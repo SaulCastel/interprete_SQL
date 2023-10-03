@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "jison src/parser.jison -o src/parser.js"
+    "build": "jison src/parser/parser.jison src/parser/lexer.flex -o src/parser/query_parser.js"
   },
   "keywords": [],
   "author": "",
