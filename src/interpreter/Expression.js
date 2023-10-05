@@ -26,6 +26,37 @@ class Binary extends Expr{
         dot += `\t"${this.id}" -- "${this.right.id}"\n`
         return dot
     }
+
+    interpret(){
+        switch(this.op){
+            case '+':
+                return this.left.interpret() + this.right.interpret()
+            case '-':
+                return this.left.interpret() - this.right.interpret()
+            case '*':
+                return this.left.interpret() * this.right.interpret()
+            case '/':
+                return this.left.interpret() / this.right.interpret()
+            case '%':
+                return this.left.interpret() % this.right.interpret()
+            case '=':
+                return this.left.interpret() === this.right.interpret()
+            case '!=':
+                return this.left.interpret() !== this.right.interpret()
+            case '<':
+                return this.left.interpret() < this.right.interpret()
+            case '>':
+                return this.left.interpret() > this.right.interpret()
+            case '>=':
+                return this.left.interpret() >= this.right.interpret()
+            case '<=':
+                return this.left.interpret() <= this.right.interpret()
+            case 'AND':
+                return this.left.interpret() && this.right.interpret()
+            case 'OR':
+                return this.left.interpret() || this.right.interpret()
+        }
+    }
 }
 
 class Unary extends Expr{
@@ -43,6 +74,15 @@ class Unary extends Expr{
         dot += `\t"${this.id}" -- "${this.id}op"\n`
         dot += `\t"${this.id}" -- "${this.operand.id}"\n`
         return dot
+    }
+
+    interpret(){
+        switch(this.operator){
+            case '-':
+                return -this.operand.interpret()
+            case 'NOT':
+                return !this.operand.interpet()
+        }
     }
 }
 
@@ -63,6 +103,10 @@ class Group extends Expr{
         dot += `\t"${this.id}" -- "${this.id}r"\n`
         return dot
     }
+
+    interpret(){
+        return this.expr.interpret()
+    }
 }
 
 class Literal extends Expr{
@@ -77,6 +121,25 @@ class Literal extends Expr{
         dot += `\t"${this.id}v"[label="${this.value}"]\n`
         dot += `\t"${this.id}" -- "${this.id}v"\n`
         return dot
+    }
+
+    interpret(){
+        switch(this.type){
+            case 'INT':
+                return Number(this.value)
+            case 'DOUBLE':
+                return Number(this.value)
+            case 'STRING':
+                return '' + this.value
+            case 'DATE':
+                return '' + this.value
+            case 'TRUE':
+                return true
+            case 'FALSE':
+                return false
+            case 'NULL':
+                return null
+        }
     }
 }
 

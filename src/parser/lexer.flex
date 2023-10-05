@@ -50,6 +50,7 @@ DATE        [0-9]{4}"-"("10"|[0-1][1-9])"-"("30"|"31"|"10"|"20"[0-2][1-9])
 "varchar"               return 'VARCHAR'
 "boolean"               return 'BOOLEAN'
 "null"                  return 'NULL'
+"print"                 return 'PRINT'
 ";"                     return ';'
 "@"                     return '@'
 ","                     return ','

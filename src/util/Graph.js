@@ -4,9 +4,9 @@ function genDOT(stmts){
     dot += '\tnode[shape=plaintext]\n'
     dot += stmts[0]._genDOT()
     dot += '\t"code0"[label="Code"]\n'
-    dot += `\t"code0" -- "${stmts[0].id}"\n`
+    dot += `\t"code0" -- "stmt${stmts[0].id}"\n`
     for (let i=1; i < stmts.length; i++){
-        dot += `\t"code${i-1}" -- "${stmts[i].id}"\n`
+        dot += `\t"code${i-1}" -- "stmt${stmts[i].id}"\n`
         dot += stmts[i]._genDOT()
         dot += `\t"code${i}"[label="Code"]\n`
         dot += `\t"code${i}" -- "code${i-1}"\n`

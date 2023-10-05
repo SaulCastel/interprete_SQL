@@ -43,7 +43,8 @@ stmt:
     |
     drop_table
     |
-    expr -> $$ = $1
+    PRINT expr
+    {$$ = new Stmt.Print(nodeId++, $2)}
 ;
 
 var_declaration:
@@ -179,5 +180,6 @@ type:
 %%
 
 const Expr = require('../interpreter/Expression.js');
+const Stmt = require('../interpreter/Statement.js')
 const escapeString = require('../util/String.js');
 var nodeId = 0;
