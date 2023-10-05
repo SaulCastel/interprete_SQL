@@ -39,6 +39,7 @@ DATE        [0-9]{4}"-"("10"|[0-1][1-9])"-"("30"|"31"|"10"|"20"[0-2][1-9])
 "to"                    return 'TO'
 "and"                   return 'AND'
 "or"                    return 'OR'
+"not"                   return 'NOT'
 "int"                   return 'INT'
 "double"                return 'DOUBLE'
 "date"                  return 'DATE'
