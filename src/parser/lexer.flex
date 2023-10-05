@@ -1,7 +1,11 @@
 ID          [a-z][a-z0-9_-]*
 NUM         [0-9]+
 FLOAT       [0-9]+"."[0-9]+
-STRING      ["][^"]*["]
+/*
+    Regex para string con caracteres de escape
+    - https://stackoverflow.com/questions/2039795/regular-expression-for-a-string-literal-in-flex-lex
+*/
+STRING      \"(\\.|[^"\\])*\"
 SCOMMENT    "--".*
 DATE        [0-9]{4}"-"("10"|[0-1][1-9])"-"("30"|"31"|"10"|"20"[0-2][1-9])
 
@@ -46,7 +50,6 @@ DATE        [0-9]{4}"-"("10"|[0-1][1-9])"-"("30"|"31"|"10"|"20"[0-2][1-9])
 "varchar"               return 'VARCHAR'
 "boolean"               return 'BOOLEAN'
 "null"                  return 'NULL'
-{ID}                    return 'ID'
 ";"                     return ';'
 "@"                     return '@'
 ","                     return ','
@@ -63,10 +66,11 @@ DATE        [0-9]{4}"-"("10"|[0-1][1-9])"-"("30"|"31"|"10"|"20"[0-2][1-9])
 "<"                     return '<'
 "<="                    return '<='
 "!="                    return '!='
-{NUM}                   return 'INT_LITERAL'
 {FLOAT}                 return 'DOUBLE_LITERAL'
+{NUM}                   return 'INT_LITERAL'
 {STRING}                return 'STRING_LITERAL'
 {DATE}                  return 'DATE_LITERAL'
+{ID}                    return 'ID'
 
 <<EOF>>               return 'EOF'
 .                     return 'INVALID'

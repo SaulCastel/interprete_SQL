@@ -150,7 +150,7 @@ expr:
     {$$ = new Expr.Literal(nodeId++, 'DATE', $1)}
     |
     STRING_LITERAL
-    {$$ = new Expr.Literal(nodeId++, 'VARCHAR', $1)}
+    {$$ = new Expr.Literal(nodeId++, 'STRING', $1.slice(1,-1))}
     |
     TRUE
     {$$ = new Expr.Literal(nodeId++, 'TRUE', $1)}
@@ -179,4 +179,5 @@ type:
 %%
 
 const Expr = require('../interpreter/Expression.js');
+const escapeString = require('../util/String.js');
 var nodeId = 0;

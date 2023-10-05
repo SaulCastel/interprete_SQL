@@ -73,7 +73,10 @@ class Literal extends Expr{
     }
 
     _genDOT(){
-        return `\t"${this.id}"[label="${this.value}"]\n`
+        let dot = `\t"${this.id}"[label="${this.type}"]\n`
+        dot += `\t"${this.id}v"[label="${this.value}"]\n`
+        dot += `\t"${this.id}" -- "${this.id}v"\n`
+        return dot
     }
 }
 
