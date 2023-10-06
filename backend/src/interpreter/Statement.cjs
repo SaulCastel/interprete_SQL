@@ -23,11 +23,61 @@ class Print extends Stmt{
         return dot
     }
 
-    interpret(){
-        console.log(this.expr.interpret())
+    interpret(context){
+        console.log(this.expr.interpret(context))
+    }
+}
+
+class Declare extends Stmt{
+    constructor(id, symbols){
+        super(id)
+        this.symbols = symbols
+    }
+
+    _genDOT(){
+    }
+
+    interpret(context){
+        for(const symbol of symbols){
+            context.set(symbol[0], null, symbol[1])
+        }
+    }
+}
+
+class DeclareDefault extends Stmt{
+    constructor(id, key, type, expr){
+        super(id)
+        this.key = key
+        this.type = type
+        this.expr = expr
+    }
+
+    _genDOT(){
+    }
+
+    interpret(context){
+        context.set(this.key, this.expr.interpret(), this.type)
+    }
+}
+
+class Set extends Stmt{
+    constructor(id, key, expr){
+        super(id)
+        this.key = key
+        this.expr = expr
+    }
+
+    _genDOT(){
+    }
+
+    interpret(context){
+        context.update(this.key, this.expr.interpret())
     }
 }
 
 module.exports = {
-    Print: Print
+    Print: Print,
+    Declare: Declare,
+    DeclareDefault: DeclareDefault,
+    Set: Set,
 }

@@ -29,34 +29,34 @@ class Binary extends Expr{
         return dot
     }
 
-    interpret(){
+    interpret(context = null){
         switch(this.op){
             case '+':
-                return this.left.interpret() + this.right.interpret()
+                return this.left.interpret(context) + this.right.interpret(context)
             case '-':
-                return this.left.interpret() - this.right.interpret()
+                return this.left.interpret(context) - this.right.interpret(context)
             case '*':
-                return this.left.interpret() * this.right.interpret()
+                return this.left.interpret(context) * this.right.interpret(context)
             case '/':
-                return this.left.interpret() / this.right.interpret()
+                return this.left.interpret(context) / this.right.interpret(context)
             case '%':
-                return this.left.interpret() % this.right.interpret()
+                return this.left.interpret(context) % this.right.interpret(context)
             case '=':
-                return this.left.interpret() === this.right.interpret()
+                return this.left.interpret(context) === this.right.interpret(context)
             case '!=':
-                return this.left.interpret() !== this.right.interpret()
+                return this.left.interpret(context) !== this.right.interpret(context)
             case '<':
-                return this.left.interpret() < this.right.interpret()
+                return this.left.interpret(context) < this.right.interpret(context)
             case '>':
-                return this.left.interpret() > this.right.interpret()
+                return this.left.interpret(context) > this.right.interpret(context)
             case '>=':
-                return this.left.interpret() >= this.right.interpret()
+                return this.left.interpret(context) >= this.right.interpret(context)
             case '<=':
-                return this.left.interpret() <= this.right.interpret()
+                return this.left.interpret(context) <= this.right.interpret(context)
             case 'AND':
-                return this.left.interpret() && this.right.interpret()
+                return this.left.interpret(context) && this.right.interpret(context)
             case 'OR':
-                return this.left.interpret() || this.right.interpret()
+                return this.left.interpret(context) || this.right.interpret(context)
         }
     }
 }
@@ -78,12 +78,12 @@ class Unary extends Expr{
         return dot
     }
 
-    interpret(){
+    interpret(context = null){
         switch(this.operator){
             case '-':
-                return -this.operand.interpret()
+                return -this.operand.interpret(context)
             case 'NOT':
-                return !this.operand.interpet()
+                return !this.operand.interpet(context)
         }
     }
 }
@@ -106,8 +106,8 @@ class Group extends Expr{
         return dot
     }
 
-    interpret(){
-        return this.expr.interpret()
+    interpret(context = null){
+        return this.expr.interpret(context)
     }
 }
 
@@ -125,7 +125,7 @@ class Literal extends Expr{
         return dot
     }
 
-    interpret(){
+    interpret(context = null){
         switch(this.type){
             case 'INT':
                 return Number(this.value)
@@ -145,9 +145,23 @@ class Literal extends Expr{
     }
 }
 
+class Identifier extends Expr{
+    constructor(id, name){
+        super(id)
+        this.name = name
+    }
+
+    _genDOT(){}
+
+    interpret(context){
+        return context.get(this.name).value
+    }
+}
+
 module.exports = {
     Binary:     Binary,
     Unary:      Unary,
     Group:      Group,
-    Literal:    Literal
+    Literal:    Literal,
+    Identifier: Identifier,
 }

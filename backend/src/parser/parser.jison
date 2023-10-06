@@ -49,20 +49,31 @@ stmt:
 
 var_declaration:
     DECLARE var_list
+    {$$ = new Stmt.Declare(nodeId++, $2)}
 ;
 
 var_list:
     var_list ',' '@' ID type
+    {
+        $$ = $1
+        $$.push([$4, $5])
+    }
     |
     '@' ID type
+    {
+        $$ = []
+        $$.push([$2, $3])
+    }
 ;
 
 var_default:
     DECLARE '@' ID type DEFAULT expr
+    {$$ = new Stmt.DeclareDefault(nodeId++, $3, $4, $6)}
 ;
 
 var_assignment:
     SET '@' ID '=' expr
+    {$$ = new Stmt.Set(nodeId++, $3, $5)}
 ;
 
 create_table:
@@ -161,6 +172,9 @@ expr:
     |
     NULL
     {$$ = new Expr.Literal(nodeId++, 'NULL', $1)}
+    |
+    '@' ID
+    {$$ = new Expr.Identifier(nodeId++, $2)}
 ;
 
 type:
