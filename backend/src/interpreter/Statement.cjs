@@ -23,8 +23,8 @@ class Print extends Stmt{
         return dot
     }
 
-    interpret(context){
-        console.log(this.expr.interpret(context))
+    interpret(context, output){
+        output.messages.push(this.expr.interpret(context))
     }
 }
 
@@ -37,8 +37,8 @@ class Declare extends Stmt{
     _genDOT(){
     }
 
-    interpret(context){
-        for(const symbol of symbols){
+    interpret(context, output){
+        for(const symbol of this.symbols){
             context.set(symbol[0], null, symbol[1])
         }
     }
@@ -55,7 +55,7 @@ class DeclareDefault extends Stmt{
     _genDOT(){
     }
 
-    interpret(context){
+    interpret(context, output){
         context.set(this.key, this.expr.interpret(), this.type)
     }
 }
@@ -70,7 +70,7 @@ class Set extends Stmt{
     _genDOT(){
     }
 
-    interpret(context){
+    interpret(context, output){
         context.update(this.key, this.expr.interpret())
     }
 }

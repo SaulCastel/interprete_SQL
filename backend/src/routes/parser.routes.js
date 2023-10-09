@@ -3,6 +3,6 @@ import * as controller from '../controllers/parser.controller.js'
 
 const router = Router()
 
-router.get('/interpret', controller.interpret)
+router.post('/interpret', controller.interpret)
 
 export default router
