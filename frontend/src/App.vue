@@ -31,7 +31,7 @@ export default {
             this.input = e.target.value
         },
         updateOutput(str) {
-            this.output += '[saul@olc1 ~]$ ' + str
+            this.output += '[saul@olc1 ~]$ ' + str + "\n"
         }
     }
 }

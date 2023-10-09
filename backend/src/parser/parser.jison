@@ -53,13 +53,13 @@ var_declaration:
 ;
 
 var_list:
-    var_list ',' '@' ID type
+    var_list ',' '@' identifier type
     {
         $$ = $1
         $$.push([$4, $5])
     }
     |
-    '@' ID type
+    '@' identifier type
     {
         $$ = []
         $$.push([$2, $3])
@@ -67,40 +67,56 @@ var_list:
 ;
 
 var_default:
-    DECLARE '@' ID type DEFAULT expr
+    DECLARE '@' identifier type DEFAULT expr
     {$$ = new Stmt.DeclareDefault(nodeId++, $3, $4, $6)}
 ;
 
 var_assignment:
-    SET '@' ID '=' expr
+    SET '@' identifier '=' expr
     {$$ = new Stmt.Set(nodeId++, $3, $5)}
 ;
 
 create_table:
-    CREATE TABLE ID '(' column_list ')'
+    CREATE TABLE identifier '(' column_list ')'
+    {$$ = new Stmt.CreateTable(nodeId++, $3, $5)}
 ;
 
 column_list:
-    column_list ',' ID type
-    ID type
+    column_list ',' identifier type
+    {
+        $$ = $1
+        $$.push([$3, $4])
+    }
+    |
+    identifier type
+    {
+        $$ = []
+        $$.push([$1, $2])
+    }
 ;
 
 alter_table:
-    ALTER TABLE ID alter_action
+    ALTER TABLE identifier alter_action
+    {$$ = new Stmt.AlterTable(nodeId++, $3, $4)}
 ;
 
 alter_action:
-    ADD ID type
+    ADD identifier type
+    {$$ = ['ADD', $2, $3]}
     |
-    DROP COLUMN ID
+    DROP COLUMN identifier
+    {$$ = ['DROP', $3]}
     |
-    RENAME TO ID
+    RENAME TO identifier
+    {$$ = ['RENAME', $3]}
     |
-    RENAME COLUMN ID TO ID
+    RENAME COLUMN identifier TO identifier
+    {$$ = ['RENAME_C', $3, $5]}
 ;
 
 drop_table:
-    DROP TABLE ID
+    DROP TABLE identifier
+    {$$ = new Stmt.DropTable(nodeId++, $3)}
 ;
 
 expr:
@@ -138,16 +154,16 @@ expr:
     {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
     |
     expr AND expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2.toUpperCase(), $3)}
+    {$$ = new Expr.Binary(nodeId++, $1, 'AND', $3)}
     |
     expr OR expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2.toUpperCase(), $3)}
+    {$$ = new Expr.Binary(nodeId++, $1, 'OR', $3)}
     |
     '-' expr %prec UMINUS
     {$$ = new Expr.Unary(nodeId++, $1, $2)}
     |
     NOT expr
-    {$$ = new Expr.Unary(nodeId++, $1.toUpperCase(), $2)}
+    {$$ = new Expr.Unary(nodeId++, 'NOT', $2)}
     |
     '(' expr ')'
     {$$ = new Expr.Group(nodeId++, $2)}
@@ -173,7 +189,7 @@ expr:
     NULL
     {$$ = new Expr.Literal(nodeId++, 'NULL', $1)}
     |
-    '@' ID
+    '@' identifier
     {$$ = new Expr.Identifier(nodeId++, $2)}
 ;
 
@@ -189,6 +205,11 @@ type:
     BOOLEAN
     |
     NULL
+;
+
+identifier:
+    ID
+    {$$ = $1.toLowerCase()}
 ;
 
 %%

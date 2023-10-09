@@ -23,8 +23,8 @@ class Print extends Stmt{
         return dot
     }
 
-    interpret(context, output){
-        output.messages.push(this.expr.interpret(context))
+    interpret(context, state){
+        state.messages.push(this.expr.interpret(context))
     }
 }
 
@@ -37,7 +37,7 @@ class Declare extends Stmt{
     _genDOT(){
     }
 
-    interpret(context, output){
+    interpret(context, state){
         for(const symbol of this.symbols){
             context.set(symbol[0], null, symbol[1])
         }
@@ -55,7 +55,7 @@ class DeclareDefault extends Stmt{
     _genDOT(){
     }
 
-    interpret(context, output){
+    interpret(context, state){
         context.set(this.key, this.expr.interpret(), this.type)
     }
 }
@@ -70,14 +70,59 @@ class Set extends Stmt{
     _genDOT(){
     }
 
-    interpret(context, output){
+    interpret(context, state){
         context.update(this.key, this.expr.interpret())
     }
 }
 
+class CreateTable extends Stmt{
+    constructor(id, tableId, columns){
+        super(id)
+        this.tableId = tableId
+        this.columns = columns
+    }
+
+    _genDOT(){}
+
+    interpret(context, state){
+        state.database.createTable(this.tableId, this.columns)
+    }
+}
+
+class AlterTable extends Stmt{
+    constructor(id, tableId, action){
+        super(id)
+        this.tableId = tableId
+        this.action = action
+        
+    }
+
+    _genDOT(){}
+
+    interpret(context, state){
+        state.database.alterTable(this.tableId, this.action)
+    }
+}
+
+class DropTable extends Stmt{
+    constructor(id, tableId){
+        super(id)
+        this.tableId = tableId
+    }
+
+    _genDOT(){}
+
+    interpret(context, state){
+        state.database.dropTable(this.tableId)
+    }
+}
+
 module.exports = {
-    Print: Print,
-    Declare: Declare,
-    DeclareDefault: DeclareDefault,
-    Set: Set,
+    Print,
+    Declare,
+    DeclareDefault,
+    Set,
+    CreateTable,
+    AlterTable,
+    DropTable,
 }
