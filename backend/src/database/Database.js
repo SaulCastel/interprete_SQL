@@ -6,7 +6,7 @@ export default class Database{
     }
 
     createTable(id, columns){
-        this.tables[id] = new Table(columns)
+        this.tables[id] = new Table(id, columns)
     }
 
     dropTable(id){
@@ -32,11 +32,16 @@ export default class Database{
 
     renameTable(id, newId){
         const table = this.tables[id]
+        table.name = newId
         this.tables[newId] = table
         delete this.tables[id]
     }
 
     insertInto(tableId, columns, values, context){
         this.tables[tableId].insert(columns, values, context)
+    }
+
+    selectFrom(tableId, selection, condition, context){
+        return this.tables[tableId].select(selection, condition, context)
     }
 }

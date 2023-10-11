@@ -158,10 +158,24 @@ class Variable extends Expr{
     }
 }
 
+class Identifier extends Expr{
+    constructor(id, name){
+        super(id)
+        this.name = name
+    }
+
+    _genDOT(){}
+
+    interpret(context){
+        return context.get(this.name).value
+    }
+}
+
 module.exports = {
     Binary,
     Unary,
     Group,
     Literal,
     Variable,
+    Identifier,
 }

@@ -166,61 +166,124 @@ value_list:
 ;
 
 select_print:
-    SELECT select_list
+    SELECT print_list
     {$$ = new Stmt.Select(nodeId++, $2)}
+;
+
+print_list:
+    print_list ',' expr asign_alias
+    {
+        $$ = $1
+        $$.push([$3, $4])
+    }
+    |
+    expr asign_alias
+    {
+        $$ = []
+        $$.push([$1, $2])
+    }
 ;
 
 select_from:
     SELECT '*' FROM identifier where
     {$$ = new Stmt.SelectFrom(nodeId++, $4, $2, $5)}
     |
-    SELECT select_list FROM identifier where
+    SELECT selection FROM identifier where
     {$$ = new Stmt.SelectFrom(nodeId++, $4, $2, $5)}
 ;
 
-where:
-    WHERE expr
-    {$$ = $2}
-    |
-    /* epsilon */
-;
-
-select_list:
-    select_list ',' select_item
+selection:
+    selection ',' identifier asign_alias
     {
         $$ = $1
-        $$.push($3)
+        $$.push([$3, $4])
     }
     |
-    select_item
+    identifier asign_alias
     {
         $$ = []
-        $$.push($1)
+        $$.push([$1, $2])
     }
-;
-
-select_item:
-    select_option asign_alias
-    {
-        $$ = [$1, $2]
-    }
-;
-
-select_opion:
-    '@' identifier
-    {$$ = new Expr.Variable(nodeId++, $2)}
-    |
-    identifier
 ;
 
 asign_alias:
-    AS identifer
+    AS identifier
     {$$ = $2}
     |
-    AS STRING_LITERAL
+    AS string_literal
     {$$ = $2}
     |
     /* epsilon */
+;
+
+where:
+    WHERE conditions
+    {$$ = $2}
+    |
+    /* epsilon */
+;
+
+conditions:
+    conditions AND condition
+    {$$ = new Expr.Binary(nodeId++, $1, 'AND', $3)}
+    |
+    conditions OR condition
+    {$$ = new Expr.Binary(nodeId++, $1, 'OR', $3)}
+    |
+    condition
+;
+
+condition:
+    column_name '=' cond_expr
+    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    |
+    column_name '!=' cond_expr
+    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    |
+    column_name '<' cond_expr
+    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    |
+    column_name '<=' cond_expr
+    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    |
+    column_name '>' cond_expr
+    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    |
+    column_name '>=' cond_expr
+    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+;
+
+column_name:
+    identifier
+    {$$ = new Expr.Identifier(nodeId++, $1)}
+;
+
+cond_expr:
+    cond_expr '+' cond_expr
+    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    |
+    cond_expr '-' cond_expr
+    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    |
+    cond_expr '*' cond_expr
+    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    |
+    cond_expr '/' cond_expr
+    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    |
+    cond_expr '%' cond_expr
+    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    |
+    '-' cond_expr %prec UMINUS
+    {$$ = new Expr.Unary(nodeId++, $1, $2)}
+    |
+    '(' cond_expr ')'
+    {$$ = new Expr.Group(nodeId++, $2)}
+    |
+    literal
+    |
+    '@' identifier
+    {$$ = new Expr.Variable(nodeId++, $2)}
 ;
 
 update:
@@ -290,6 +353,13 @@ expr:
     '(' expr ')'
     {$$ = new Expr.Group(nodeId++, $2)}
     |
+    literal
+    |
+    '@' identifier
+    {$$ = new Expr.Variable(nodeId++, $2)}
+;
+
+literal:
     INT_LITERAL
     {$$ = new Expr.Literal(nodeId++, 'INT', $1)}
     |
@@ -299,8 +369,8 @@ expr:
     DATE_LITERAL
     {$$ = new Expr.Literal(nodeId++, 'DATE', $1)}
     |
-    STRING_LITERAL
-    {$$ = new Expr.Literal(nodeId++, 'STRING', $1.slice(1,-1))}
+    string_literal
+    {$$ = new Expr.Literal(nodeId++, 'STRING', $1)}
     |
     TRUE
     {$$ = new Expr.Literal(nodeId++, 'TRUE', $1)}
@@ -310,12 +380,6 @@ expr:
     |
     NULL
     {$$ = new Expr.Literal(nodeId++, 'NULL', $1)}
-    |
-    '@' identifier
-    {$$ = new Expr.Variable(nodeId++, $2)}
-    |
-    identifier
-    /* No se crea un nodo porque este ID solo se usa en WHERE */
 ;
 
 type:
@@ -335,6 +399,11 @@ type:
 identifier:
     ID
     {$$ = $1.toLowerCase()}
+;
+
+string_literal:
+    STRING_LITERAL
+    {$$ = $1.slice(1,-1)}
 ;
 
 %%

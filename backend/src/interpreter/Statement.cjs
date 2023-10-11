@@ -132,6 +132,21 @@ class InsertInto extends Stmt{
     }
 }
 
+class SelectFrom extends Stmt{
+    constructor(id, tableId, selection, condition){
+        super(id)
+        this.tableId = tableId
+        this.selection = selection
+        this.condition = condition
+    }
+
+    _genDOT(){}
+
+    interpret(context, state){
+        state.table = state.database.selectFrom(this.tableId, this.selection, this.condition, context)
+    }
+}
+
 module.exports = {
     Print,
     Declare,
@@ -141,4 +156,5 @@ module.exports = {
     AlterTable,
     DropTable,
     InsertInto,
+    SelectFrom,
 }

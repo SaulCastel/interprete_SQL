@@ -1,6 +1,10 @@
+import Context from "../interpreter/Context.cjs"
+
 export default class Table{
-    constructor(columns){
+    constructor(name, columns){
+        this.name = name
         this.columns = {}
+        this.cardinality = 0
         for (const column of columns){
             this.addCol(column[0], column[1])
         }
@@ -30,5 +34,67 @@ export default class Table{
         for(let i = 0; i < columns_arr.length; i++){
             this.columns[columns_arr[i]].values.push(values_arr[i].interpret(context))
         }
+        this.cardinality++;
+    }
+
+    select(selection, condition, context){
+        let column_list = this.getColumns(selection)
+        const records = []
+        for(let i = 0; i < this.cardinality; i++){
+            const row = this.getRowAtIndex(column_list.columns, i)
+            if(condition){
+                const header = this.getHeaderContext(column_list.columns, row, context)
+                if(condition.interpret(header)){
+                    records.push(row)
+                }
+            }else{
+                records.push(row)
+            }
+        }
+        return {
+            header: [...column_list.aliases],
+            records
+        }
+    }
+
+    getColumns(selection){
+        if(selection === '*'){
+            const columns = Object.keys(this.columns)
+            return {
+                columns,
+                aliases: columns
+            }
+        }
+        const column_list = {
+            columns: [],
+            aliases: []
+        }
+        for(const col of selection){
+            column_list.columns.push(col[0])
+            if(col[1]){
+                column_list.aliases.push(col[1])
+            }else{
+                column_list.aliases.push(col[0])
+            }
+        }
+        return column_list
+    }
+
+    getRowAtIndex(column_list, index){
+        const row = []
+        for(const col of column_list){
+            row.push(this.columns[col].values[index])
+        }
+        return row
+    }
+
+    getHeaderContext(column_list, row, context){
+        const header = new Context(`${this.name}_header`, context)
+        for(let i = 0; i < column_list.length; i++){
+            const id = column_list[i]
+            const type = this.columns[id].type
+            header.set(id, row[i], type)
+        }
+        return header
     }
 }

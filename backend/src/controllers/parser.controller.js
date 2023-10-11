@@ -8,13 +8,15 @@ export const interpret = (req, res) => {
     const global = new Context('Global')
     let state = {
         messages: [],
-        database: new Database()
+        database: new Database(),
+        table: null
     }
     for(const stmt of stmts){
         stmt.interpret(global, state)
     }
     const output = {
-        messages: state.messages
+        messages: state.messages,
+        table: state.table
     }
     res.status(200).json(output)
 }

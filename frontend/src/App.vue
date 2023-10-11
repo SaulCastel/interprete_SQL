@@ -1,9 +1,14 @@
 <script>
+import Table from './components/Table.vue'
 export default {
+    components:{
+        Table
+    },
     data() {
         return {
             input: '',
-            output: ''
+            output: '',
+            table: undefined
         }
     },
     methods: {
@@ -23,6 +28,7 @@ export default {
                     output += msg
                 }
                 this.updateOutput(output)
+                this.table = result.table
             } catch (error) {
                 console.error("Error:", error)
             }
@@ -43,4 +49,9 @@ export default {
     <button @click="interpret">Ejecutar</button>
     <p>Salida:</p>
     <pre>{{ output }}</pre>
+    <div v-if="table">
+        <p>Selección:</p>
+        <Table :header="table.header" :records="table.records"></Table>
+    </div>
+    <p v-else>No se ha hecho ninguna consulta</p>
 </template>
