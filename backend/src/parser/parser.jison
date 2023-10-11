@@ -45,6 +45,18 @@ stmt:
     |
     PRINT expr
     {$$ = new Stmt.Print(nodeId++, $2)}
+    |
+    select_from
+    |
+    select_print
+    |
+    insert_into
+    |
+    update
+    |
+    delete_from
+    |
+    truncate
 ;
 
 var_declaration:
@@ -77,12 +89,12 @@ var_assignment:
 ;
 
 create_table:
-    CREATE TABLE identifier '(' column_list ')'
+    CREATE TABLE identifier '(' col_declaration ')'
     {$$ = new Stmt.CreateTable(nodeId++, $3, $5)}
 ;
 
-column_list:
-    column_list ',' identifier type
+col_declaration:
+    col_declaration ',' identifier type
     {
         $$ = $1
         $$.push([$3, $4])
@@ -117,6 +129,116 @@ alter_action:
 drop_table:
     DROP TABLE identifier
     {$$ = new Stmt.DropTable(nodeId++, $3)}
+;
+
+insert_into:
+    INSERT INTO identifier '(' column_list ')'
+    VALUES '(' value_list ')'
+    {$$ = new Stmt.InsertInto(nodeId++, $3, $5, $9)}
+;
+
+column_list:
+    column_list ',' identifier
+    {
+        $$ = $1
+        $$.push($3)
+    }
+    |
+    identifier
+    {
+        $$ = []
+        $$.push($1)
+    }
+;
+
+value_list:
+    value_list ',' expr
+    {
+        $$ = $1
+        $$.push($3)
+    }
+    |
+    expr
+    {
+        $$ = []
+        $$.push($1)
+    }
+;
+
+select_print:
+    SELECT select_list
+    {$$ = new Stmt.Select(nodeId++, $2)}
+;
+
+select_from:
+    SELECT '*' FROM identifier where
+    {$$ = new Stmt.SelectFrom(nodeId++, $4, $2, $5)}
+    |
+    SELECT select_list FROM identifier where
+    {$$ = new Stmt.SelectFrom(nodeId++, $4, $2, $5)}
+;
+
+where:
+    WHERE expr
+    {$$ = $2}
+    |
+    /* epsilon */
+;
+
+select_list:
+    select_list ',' select_item
+    {
+        $$ = $1
+        $$.push($3)
+    }
+    |
+    select_item
+    {
+        $$ = []
+        $$.push($1)
+    }
+;
+
+select_item:
+    select_option asign_alias
+    {
+        $$ = [$1, $2]
+    }
+;
+
+select_opion:
+    '@' identifier
+    {$$ = new Expr.Variable(nodeId++, $2)}
+    |
+    identifier
+;
+
+asign_alias:
+    AS identifer
+    {$$ = $2}
+    |
+    AS STRING_LITERAL
+    {$$ = $2}
+    |
+    /* epsilon */
+;
+
+update:
+    UPDATE identifier SET update_list where
+;
+
+update_list:
+    update_list ',' identifier '=' expr
+    |
+    identifier '=' expr
+;
+
+truncate:
+    TRUNCATE TABLE identifier
+;
+
+delete_from:
+    DELETE FROM identifier where
 ;
 
 expr:
@@ -190,7 +312,10 @@ expr:
     {$$ = new Expr.Literal(nodeId++, 'NULL', $1)}
     |
     '@' identifier
-    {$$ = new Expr.Identifier(nodeId++, $2)}
+    {$$ = new Expr.Variable(nodeId++, $2)}
+    |
+    identifier
+    /* No se crea un nodo porque este ID solo se usa en WHERE */
 ;
 
 type:

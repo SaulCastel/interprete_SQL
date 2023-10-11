@@ -145,7 +145,7 @@ class Literal extends Expr{
     }
 }
 
-class Identifier extends Expr{
+class Variable extends Expr{
     constructor(id, name){
         super(id)
         this.name = name
@@ -159,9 +159,9 @@ class Identifier extends Expr{
 }
 
 module.exports = {
-    Binary:     Binary,
-    Unary:      Unary,
-    Group:      Group,
-    Literal:    Literal,
-    Identifier: Identifier,
+    Binary,
+    Unary,
+    Group,
+    Literal,
+    Variable,
 }

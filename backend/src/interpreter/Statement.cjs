@@ -117,6 +117,21 @@ class DropTable extends Stmt{
     }
 }
 
+class InsertInto extends Stmt{
+    constructor(id, tableId, columns, values){
+        super(id)
+        this.tableId = tableId
+        this.columns = columns
+        this.values = values
+    }
+
+    _genDOT(){}
+
+    interpret(context, state){
+        state.database.insertInto(this.tableId, this.columns, this.values, context)
+    }
+}
+
 module.exports = {
     Print,
     Declare,
@@ -125,4 +140,5 @@ module.exports = {
     CreateTable,
     AlterTable,
     DropTable,
+    InsertInto,
 }

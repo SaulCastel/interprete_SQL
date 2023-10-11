@@ -19,4 +19,16 @@ export default class Table{
     dropCol(id){
         delete this.columns[id]
     }
+
+    insert(columns_arr, values_arr, context){
+        const all = Object.keys(this.columns)
+        for(const col of all){
+            if(!columns_arr.includes(col)){
+                this.columns[col].values.push(null)
+            }
+        }
+        for(let i = 0; i < columns_arr.length; i++){
+            this.columns[columns_arr[i]].values.push(values_arr[i].interpret(context))
+        }
+    }
 }

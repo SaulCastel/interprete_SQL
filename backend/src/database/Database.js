@@ -35,4 +35,8 @@ export default class Database{
         this.tables[newId] = table
         delete this.tables[id]
     }
+
+    insertInto(tableId, columns, values, context){
+        this.tables[tableId].insert(columns, values, context)
+    }
 }
