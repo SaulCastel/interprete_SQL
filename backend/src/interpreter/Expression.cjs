@@ -1,4 +1,5 @@
-const escapeStr = require('../util/String.cjs')
+const Types = require('./Types.cjs')
+const Arithmetic = require('./Arithmetic.cjs')
 
 class Expr{
     constructor(id){
@@ -30,17 +31,28 @@ class Binary extends Expr{
     }
 
     interpret(context = null){
+        let left, right
         switch(this.op){
             case '+':
-                return this.left.interpret(context) + this.right.interpret(context)
+                left = this.left.interpret(context)
+                right = this.right.interpret(context)
+                return Arithmetic.sum(left, right)
             case '-':
-                return this.left.interpret(context) - this.right.interpret(context)
+                left = this.left.interpret(context)
+                right = this.right.interpret(context)
+                return Arithmetic.sub(left, right)
             case '*':
-                return this.left.interpret(context) * this.right.interpret(context)
+                left = this.left.interpret(context)
+                right = this.right.interpret(context)
+                return Arithmetic.mult(left, right)
             case '/':
-                return this.left.interpret(context) / this.right.interpret(context)
+                left = this.left.interpret(context)
+                right = this.right.interpret(context)
+                return Arithmetic.div(left, right)
             case '%':
-                return this.left.interpret(context) % this.right.interpret(context)
+                left = this.left.interpret(context)
+                right = this.right.interpret(context)
+                return Arithmetic.mod(left, right)
             case '=':
                 return this.left.interpret(context) === this.right.interpret(context)
             case '!=':
@@ -81,7 +93,7 @@ class Unary extends Expr{
     interpret(context = null){
         switch(this.operator){
             case '-':
-                return -this.operand.interpret(context)
+                return Arithmetic.neg(this.operand.interpret(context))
             case 'NOT':
                 return !this.operand.interpet(context)
         }
@@ -128,19 +140,19 @@ class Literal extends Expr{
     interpret(context = null){
         switch(this.type){
             case 'INT':
-                return Number(this.value)
+                return new Types.INT(this.type, this.value)
             case 'DOUBLE':
-                return Number(this.value)
+                return new Types.DOUBLE(this.type, this.value)
             case 'STRING':
-                return escapeStr('' + this.value)
+                return new Types.STRING(this.type, this.value)
             case 'DATE':
-                return '' + this.value
+                return new Types.DATE(this.type, this.value)
             case 'TRUE':
-                return true
+                return new Types.BOOLEAN(this.type, true)
             case 'FALSE':
-                return false
+                return new Types.BOOLEAN(this.type, false)
             case 'NULL':
-                return null
+                return new Types.NULL(this.type)
         }
     }
 }
@@ -154,7 +166,8 @@ class Variable extends Expr{
     _genDOT(){}
 
     interpret(context){
-        return context.get(this.name).value
+        const symbol = context.get(this.name)
+        return new Literal(null, symbol.type, symbol.value).interpret()
     }
 }
 
@@ -167,7 +180,8 @@ class Identifier extends Expr{
     _genDOT(){}
 
     interpret(context){
-        return context.get(this.name).value
+        const symbol = context.get(this.name)
+        return new Literal(null, symbol.type, symbol.value).interpret()
     }
 }
 

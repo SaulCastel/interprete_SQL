@@ -24,7 +24,7 @@ class Print extends Stmt{
     }
 
     interpret(context, state){
-        state.messages.push(this.expr.interpret(context))
+        state.messages.push(String(this.expr.interpret(context))+'\n')
     }
 }
 
@@ -56,7 +56,7 @@ class DeclareDefault extends Stmt{
     }
 
     interpret(context, state){
-        context.set(this.key, this.expr.interpret(), this.type)
+        context.set(this.key, this.expr.interpret(context), this.type)
     }
 }
 
@@ -71,7 +71,7 @@ class Set extends Stmt{
     }
 
     interpret(context, state){
-        context.update(this.key, this.expr.interpret())
+        context.update(this.key, this.expr.interpret(context))
     }
 }
 
@@ -94,7 +94,6 @@ class AlterTable extends Stmt{
         super(id)
         this.tableId = tableId
         this.action = action
-        
     }
 
     _genDOT(){}

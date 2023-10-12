@@ -221,6 +221,9 @@ break;
 case 96:
 this.$ = new Expr.Literal(nodeId++, 'NULL', $$[$0])
 break;
+case 97: case 98: case 99: case 100: case 101: case 102:
+this.$ = $$[$0].toUpperCase()
+break;
 case 103:
 this.$ = $$[$0].toLowerCase()
 break;
@@ -822,13 +825,13 @@ case 54:return 66
 break;
 case 55:return 64
 break;
-case 56:return 80
+case 56:return 81
 break;
-case 57:return 79
+case 57:return 80
 break;
-case 58:return 91
+case 58:return 79
 break;
-case 59:return 81
+case 59:return 91
 break;
 case 60:return 90
 break;
@@ -840,9 +843,20 @@ case 63:console.log(yy_.yytext);
 break;
 }
 },
-rules: [/^(?:\s+)/i,/^(?:(--.*))/i,/^(?:\/\*)/i,/^(?:\*\/)/i,/^(?:[^\n]+)/i,/^(?:\n)/i,/^(?:true)/i,/^(?:false)/i,/^(?:declare)/i,/^(?:default)/i,/^(?:set)/i,/^(?:create)/i,/^(?:table)/i,/^(?:alter)/i,/^(?:table)/i,/^(?:add)/i,/^(?:drop)/i,/^(?:rename)/i,/^(?:column)/i,/^(?:to)/i,/^(?:and)/i,/^(?:or)/i,/^(?:not)/i,/^(?:int)/i,/^(?:double)/i,/^(?:date)/i,/^(?:varchar)/i,/^(?:boolean)/i,/^(?:null)/i,/^(?:print)/i,/^(?:insert)/i,/^(?:into)/i,/^(?:values)/i,/^(?:select)/i,/^(?:from)/i,/^(?:where)/i,/^(?:as)/i,/^(?:update)/i,/^(?:truncate)/i,/^(?:delete)/i,/^(?:;)/i,/^(?:@)/i,/^(?:,)/i,/^(?:\()/i,/^(?:\))/i,/^(?:\+)/i,/^(?:-)/i,/^(?:\*)/i,/^(?:\/)/i,/^(?:%)/i,/^(?:=)/i,/^(?:>)/i,/^(?:>=)/i,/^(?:<)/i,/^(?:<=)/i,/^(?:!=)/i,/^(?:([0-9]+\.[0-9]+))/i,/^(?:([0-9]+))/i,/^(?:("(\\.|[^"\\])*"))/i,/^(?:([0-9]{4}-(10|[0-1][1-9])-(30|31|10|20[0-2][1-9])))/i,/^(?:([a-z][a-z0-9_-]*))/i,/^(?:$)/i,/^(?:.)/i,/^(?:.)/i],
+rules: [/^(?:\s+)/i,/^(?:--.*)/i,/^(?:\/\*)/i,/^(?:\*\/)/i,/^(?:[^\n]+)/i,/^(?:\n)/i,/^(?:true)/i,/^(?:false)/i,/^(?:declare)/i,/^(?:default)/i,/^(?:set)/i,/^(?:create)/i,/^(?:table)/i,/^(?:alter)/i,/^(?:table)/i,/^(?:add)/i,/^(?:drop)/i,/^(?:rename)/i,/^(?:column)/i,/^(?:to)/i,/^(?:and)/i,/^(?:or)/i,/^(?:not)/i,/^(?:int)/i,/^(?:double)/i,/^(?:date)/i,/^(?:varchar)/i,/^(?:boolean)/i,/^(?:null)/i,/^(?:print)/i,/^(?:insert)/i,/^(?:into)/i,/^(?:values)/i,/^(?:select)/i,/^(?:from)/i,/^(?:where)/i,/^(?:as)/i,/^(?:update)/i,/^(?:truncate)/i,/^(?:delete)/i,/^(?:;)/i,/^(?:@)/i,/^(?:,)/i,/^(?:\()/i,/^(?:\))/i,/^(?:\+)/i,/^(?:-)/i,/^(?:\*)/i,/^(?:\/)/i,/^(?:%)/i,/^(?:=)/i,/^(?:>)/i,/^(?:>=)/i,/^(?:<)/i,/^(?:<=)/i,/^(?:!=)/i,/^(?:(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01]))/i,/^(?:[0-9]+\.[0-9]+)/i,/^(?:[0-9]+)/i,/^(?:"(\\.|[^"\\])*")/i,/^(?:[a-z][a-z0-9_-]*)/i,/^(?:$)/i,/^(?:.)/i,/^(?:.)/i],
 conditions: {"comment":{"rules":[3,4,5],"inclusive":false},"INITIAL":{"rules":[0,1,2,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63],"inclusive":true}}
 });
+/*
+    Regex para string con caracteres de escape
+    - https://stackoverflow.com/questions/2039795/regular-expression-for-a-string-literal-in-flex-lex
+
+    Regex para comentario multilinea
+    - https://westes.github.io/flex/manual/How-can-I-match-C_002dstyle-comments_003f.html
+    - https://gerhobbelt.github.io/jison/docs/#lexical-analysis
+
+    Regex para fecha
+    - https://www.regular-expressions.info/dates.html
+*/;
 return lexer;
 })();
 parser.lexer = lexer;

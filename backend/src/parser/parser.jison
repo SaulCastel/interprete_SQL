@@ -384,16 +384,22 @@ literal:
 
 type:
     INT
+    {$$ = $1.toUpperCase()}
     |
     DOUBLE
+    {$$ = $1.toUpperCase()}
     |
     DATE
+    {$$ = $1.toUpperCase()}
     |
     VARCHAR
+    {$$ = $1.toUpperCase()}
     |
     BOOLEAN
+    {$$ = $1.toUpperCase()}
     |
     NULL
+    {$$ = $1.toUpperCase()}
 ;
 
 identifier:
