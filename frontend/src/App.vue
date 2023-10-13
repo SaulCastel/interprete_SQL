@@ -1,14 +1,14 @@
 <script>
 import Table from './components/Table.vue'
 export default {
-    components:{
+    components: {
         Table
     },
     data() {
         return {
             input: '',
             output: '',
-            table: undefined
+            tables: undefined
         }
     },
     methods: {
@@ -28,7 +28,7 @@ export default {
                     output += msg
                 }
                 this.updateOutput(output)
-                this.table = result.table
+                this.tables = result.queries
             } catch (error) {
                 console.error("Error:", error)
             }
@@ -37,6 +37,7 @@ export default {
             this.input = e.target.value
         },
         updateOutput(str) {
+            str = (str === '') ? "\n" : str;
             this.output += '> ' + str
         }
     }
@@ -44,14 +45,22 @@ export default {
 </script>
 
 <template>
-    <p>Entrada:</p>
-    <textarea :value="input" @input="getText"></textarea>
-    <button @click="interpret">Ejecutar</button>
-    <p>Salida:</p>
-    <pre>{{ output }}</pre>
-    <div v-if="table">
-        <p>Selección:</p>
-        <Table :header="table.header" :records="table.records"></Table>
+    <nav class="navbar">
+        <a href="#" class="logo">QueryCripter</a>
+        <ul class="nav-links">
+            <li class="nav-item"><a href="#">Archivo</a></li>
+            <li class="nav-item"><a href="#" @click="interpret">Ejecutar</a></li>
+            <li class="nav-item"><a href="#">Reportes</a></li>
+        </ul>
+    </nav>
+    <div id="two-col-cont">
+        <textarea class="col pan" :value="input" @input="getText"></textarea>
+        <div class="col" id="output">
+            <pre class="pan">{{ output }}</pre>
+            <div class="pan" id="table-view">
+                <Table v-if="tables" v-for="table in tables" :header="table.header" :records="table.records"></Table>
+                <p v-else>No se ha realizado ninguna consulta</p>
+            </div>
+        </div>
     </div>
-    <p v-else>No se ha hecho ninguna consulta</p>
 </template>

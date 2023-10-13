@@ -9,14 +9,14 @@ export const interpret = (req, res) => {
     let state = {
         messages: [],
         database: new Database(),
-        table: null
+        queries: []
     }
     for(const stmt of stmts){
         stmt.interpret(global, state)
     }
     const output = {
         messages: state.messages,
-        table: state.table
+        queries: state.queries
     }
     res.status(200).json(output)
 }

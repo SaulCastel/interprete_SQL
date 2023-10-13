@@ -393,7 +393,7 @@ type:
     {$$ = $1.toUpperCase()}
     |
     VARCHAR
-    {$$ = $1.toUpperCase()}
+    {$$ = 'STRING'}
     |
     BOOLEAN
     {$$ = $1.toUpperCase()}

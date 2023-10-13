@@ -221,8 +221,11 @@ break;
 case 96:
 this.$ = new Expr.Literal(nodeId++, 'NULL', $$[$0])
 break;
-case 97: case 98: case 99: case 100: case 101: case 102:
+case 97: case 98: case 99: case 101: case 102:
 this.$ = $$[$0].toUpperCase()
+break;
+case 100:
+this.$ = 'STRING'
 break;
 case 103:
 this.$ = $$[$0].toLowerCase()

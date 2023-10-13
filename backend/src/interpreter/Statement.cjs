@@ -142,7 +142,7 @@ class SelectFrom extends Stmt{
     _genDOT(){}
 
     interpret(context, state){
-        state.table = state.database.selectFrom(this.tableId, this.selection, this.condition, context)
+        state.queries.push(state.database.selectFrom(this.tableId, this.selection, this.condition, context))
     }
 }
 

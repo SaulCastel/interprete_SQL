@@ -67,8 +67,8 @@
 \"(\\.|[^"\\])*\"                                           return 'STRING_LITERAL'
 [a-z][a-z0-9_-]*                                            return 'ID'
 
-<<EOF>>                 return 'EOF'
-.                       return 'INVALID'
+<<EOF>>                                                     return 'EOF'
+.                                                           return 'INVALID'
 
 %%
 /*
