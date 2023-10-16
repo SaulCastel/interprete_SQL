@@ -24,7 +24,8 @@ class Print extends Stmt{
     }
 
     interpret(context, state){
-        state.messages.push(String(this.expr.interpret(context))+'\n')
+        const expr = this.expr.interpret(context)
+        state.messages.push(String(expr)+'\n')
     }
 }
 
@@ -39,7 +40,7 @@ class Declare extends Stmt{
 
     interpret(context, state){
         for(const symbol of this.symbols){
-            context.set(symbol[0], null, symbol[1])
+            context.set(symbol[0], symbol[1], null)
         }
     }
 }
@@ -56,7 +57,8 @@ class DeclareDefault extends Stmt{
     }
 
     interpret(context, state){
-        context.set(this.key, this.expr.interpret(context), this.type)
+        const expr = this.expr.interpret(context)
+        context.set(this.key, this.type, expr)
     }
 }
 
@@ -71,7 +73,8 @@ class Set extends Stmt{
     }
 
     interpret(context, state){
-        context.update(this.key, this.expr.interpret(context))
+        const expr = this.expr.interpret(context)
+        context.update(this.key, expr)
     }
 }
 
@@ -142,7 +145,14 @@ class SelectFrom extends Stmt{
     _genDOT(){}
 
     interpret(context, state){
-        state.queries.push(state.database.selectFrom(this.tableId, this.selection, this.condition, context))
+        const result = state.database.selectFrom(
+            this.tableId,
+            this.selection,
+            this.condition, 
+            context
+        )
+        state.messages.push(`${result.records.length} registro(s) seleccionado(s)\n`)
+        state.queries.push(result)
     }
 }
 

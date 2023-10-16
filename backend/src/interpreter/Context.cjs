@@ -1,3 +1,5 @@
+const Literal = require('./Expression.cjs').Literal
+
 class Context{
     constructor(name, prev = null){
         this.name = name
@@ -5,15 +7,15 @@ class Context{
         this.symbols = {}
     }
 
-    set(key, value, type){
-        this.symbols[key] = new Variable(value, type)
+    set(key, type, value){
+        this.symbols[key] = new Literal(null, type, value).interpret()
     }
 
     get(key){
         const symbol = this.symbols[key]
         if(symbol === undefined){
             if (this.prev !== null){
-                symbol = this.prev.get(key)
+                return this.prev.get(key)
             }
         }
         return symbol
@@ -22,16 +24,9 @@ class Context{
     update(key, value){
         const symbol = this.get(key)
         if(symbol !== undefined){
-            symbol.value = value
-            this.symbols[key] = symbol
+            const newSymbol = new Literal(null, symbol.type, value).interpret()
+            this.symbols[key] = newSymbol
         }
-    }
-}
-
-class Variable{
-    constructor(value, type){
-        this.value = value
-        this.type = type
     }
 }
 

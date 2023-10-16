@@ -35,10 +35,10 @@ class DOUBLE extends TYPE{
 class DATE extends TYPE{
     constructor(type, value){
         super(type)
-        this.value = new Date(value+'CST')
+        this.value = new Date(String(value)+'CST')
     }
     valueOf(){
-        return this.value.getDate()
+        return this.value.getTime()
     }
     toString(){
         return this.value.toISOString().split('T')[0]
@@ -51,7 +51,7 @@ class DATE extends TYPE{
 class STRING extends TYPE{
     constructor(type, value){
         super(type)
-        this.value = escapeStr(value)
+        this.value = escapeStr(String(value))
     }
     valueOf(){
         const num = Number(this.value)
@@ -64,10 +64,11 @@ class STRING extends TYPE{
         return this.value
     }
 }
+
 class BOOLEAN extends TYPE{
     constructor(type, value){
         super(type)
-        this.value = value
+        this.value = value.valueOf()
     }
     valueOf(){
         return this.value
@@ -80,12 +81,13 @@ class BOOLEAN extends TYPE{
 class NULL extends TYPE{
     constructor(type){
         super(type)
+        this.value = null
     }
     valueOf(){
-        return null
+        return this.value
     }
     toString(){
-        return String(null)
+        return String(this.value)
     }
 }
 

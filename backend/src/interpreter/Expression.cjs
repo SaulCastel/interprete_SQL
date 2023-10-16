@@ -1,5 +1,5 @@
 const Types = require('./Types.cjs')
-const Arithmetic = require('./Arithmetic.cjs')
+const Operations = require('./Operations.cjs')
 
 class Expr{
     constructor(id){
@@ -31,44 +31,35 @@ class Binary extends Expr{
     }
 
     interpret(context = null){
-        let left, right
+        const left = this.left.interpret(context)
+        const right = this.right.interpret(context)
         switch(this.op){
             case '+':
-                left = this.left.interpret(context)
-                right = this.right.interpret(context)
-                return Arithmetic.sum(left, right)
+                return Operations.sum(left, right)
             case '-':
-                left = this.left.interpret(context)
-                right = this.right.interpret(context)
-                return Arithmetic.sub(left, right)
+                return Operations.sub(left, right)
             case '*':
-                left = this.left.interpret(context)
-                right = this.right.interpret(context)
-                return Arithmetic.mult(left, right)
+                return Operations.mult(left, right)
             case '/':
-                left = this.left.interpret(context)
-                right = this.right.interpret(context)
-                return Arithmetic.div(left, right)
+                return Operations.div(left, right)
             case '%':
-                left = this.left.interpret(context)
-                right = this.right.interpret(context)
-                return Arithmetic.mod(left, right)
+                return Operations.mod(left, right)
             case '=':
-                return this.left.interpret(context) === this.right.interpret(context)
+                return Operations.equals(left, right)
             case '!=':
-                return this.left.interpret(context) !== this.right.interpret(context)
+                return Operations.diff(left, right)
             case '<':
-                return this.left.interpret(context) < this.right.interpret(context)
+                return Operations.lessThan(left, right)
             case '>':
-                return this.left.interpret(context) > this.right.interpret(context)
+                return Operations.greaterThan(left, right)
             case '>=':
-                return this.left.interpret(context) >= this.right.interpret(context)
+                return Operations.greaterThanOrEqual(left, right)
             case '<=':
-                return this.left.interpret(context) <= this.right.interpret(context)
+                return Operations.lessThanOrEqual(left, right)
             case 'AND':
-                return this.left.interpret(context) && this.right.interpret(context)
+                return Operations.and(left, right)
             case 'OR':
-                return this.left.interpret(context) || this.right.interpret(context)
+                return Operations.or(left, right)
         }
     }
 }
@@ -93,9 +84,9 @@ class Unary extends Expr{
     interpret(context = null){
         switch(this.operator){
             case '-':
-                return Arithmetic.neg(this.operand.interpret(context))
+                return Operations.neg(this.operand.interpret(context))
             case 'NOT':
-                return !this.operand.interpet(context)
+                return Operations.not(this.operand.interpret(context))
         }
     }
 }
@@ -147,10 +138,11 @@ class Literal extends Expr{
                 return new Types.STRING(this.type, this.value)
             case 'DATE':
                 return new Types.DATE(this.type, this.value)
-            case 'TRUE':
-                return new Types.BOOLEAN(this.type, true)
-            case 'FALSE':
-                return new Types.BOOLEAN(this.type, false)
+            case 'BOOLEAN':
+                if(typeof this.value === 'string'){
+                    this.value = this.value.toLowerCase() === 'true'
+                }
+                return new Types.BOOLEAN(this.type, this.value)
             case 'NULL':
                 return new Types.NULL(this.type)
         }
@@ -166,8 +158,7 @@ class Variable extends Expr{
     _genDOT(){}
 
     interpret(context){
-        const symbol = context.get(this.name)
-        return new Literal(null, symbol.type, symbol.value).interpret()
+        return context.get(this.name)
     }
 }
 
@@ -180,8 +171,7 @@ class Identifier extends Expr{
     _genDOT(){}
 
     interpret(context){
-        const symbol = context.get(this.name)
-        return new Literal(null, symbol.type, symbol.value).interpret()
+        return context.get(this.name)
     }
 }
 

@@ -212,11 +212,8 @@ break;
 case 93:
 this.$ = new Expr.Literal(nodeId++, 'STRING', $$[$0])
 break;
-case 94:
-this.$ = new Expr.Literal(nodeId++, 'TRUE', $$[$0])
-break;
-case 95:
-this.$ = new Expr.Literal(nodeId++, 'FALSE', $$[$0])
+case 94: case 95:
+this.$ = new Expr.Literal(nodeId++, 'BOOLEAN', $$[$0])
 break;
 case 96:
 this.$ = new Expr.Literal(nodeId++, 'NULL', $$[$0])

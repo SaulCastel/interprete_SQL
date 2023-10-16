@@ -1,4 +1,5 @@
 import Context from "../interpreter/Context.cjs"
+import {NULL} from '../interpreter/Types.cjs'
 
 export default class Table{
     constructor(name, columns){
@@ -28,14 +29,17 @@ export default class Table{
         const all = Object.keys(this.columns)
         for(const col of all){
             if(!columns_arr.includes(col)){
-                this.columns[col].values.push(null)
+                this.columns[col].values.push(new NULL('NULL'))
             }
         }
         for(let i = 0; i < columns_arr.length; i++){
-            this.columns[columns_arr[i]].values.push(values_arr[i].interpret(context))
+            const expr = values_arr[i].interpret(context)
+            this.columns[columns_arr[i]].values.push(expr)
         }
-        this.cardinality++;
+        this.cardinality++
     }
+
+    //para delete hay que poner this.cardinality--
 
     select(selection, condition, context){
         let column_list = this.getColumns(selection)
@@ -44,11 +48,12 @@ export default class Table{
             const row = this.getRowAtIndex(column_list.columns, i)
             if(condition){
                 const header = this.getHeaderContext(column_list.columns, row, context)
-                if(condition.interpret(header)){
-                    records.push(row)
+                const result = condition.interpret(header).valueOf()
+                if(result){
+                    records.push(row.map(cell => String(cell)))
                 }
             }else{
-                records.push(row)
+                records.push(row.map(cell => String(cell)))
             }
         }
         return {
@@ -93,7 +98,7 @@ export default class Table{
         for(let i = 0; i < column_list.length; i++){
             const id = column_list[i]
             const type = this.columns[id].type
-            header.set(id, row[i], type)
+            header.set(id, type, row[i])
         }
         return header
     }

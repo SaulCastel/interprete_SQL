@@ -373,10 +373,10 @@ literal:
     {$$ = new Expr.Literal(nodeId++, 'STRING', $1)}
     |
     TRUE
-    {$$ = new Expr.Literal(nodeId++, 'TRUE', $1)}
+    {$$ = new Expr.Literal(nodeId++, 'BOOLEAN', $1)}
     |
     FALSE
-    {$$ = new Expr.Literal(nodeId++, 'FALSE', $1)}
+    {$$ = new Expr.Literal(nodeId++, 'BOOLEAN', $1)}
     |
     NULL
     {$$ = new Expr.Literal(nodeId++, 'NULL', $1)}
