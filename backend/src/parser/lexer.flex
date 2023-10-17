@@ -45,6 +45,7 @@
 "update"                                                    return 'UPDATE'
 "truncate"                                                  return 'TRUNCATE'
 "delete"                                                    return 'DELETE'
+"cast"                                                      return 'CAST'
 ";"                                                         return ';'
 "@"                                                         return '@'
 ","                                                         return ','

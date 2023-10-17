@@ -168,10 +168,31 @@ class Identifier extends Expr{
         this.name = name
     }
 
+    toString(){
+        return this.name
+    }
+
     _genDOT(){}
 
     interpret(context){
         return context.get(this.name)
+    }
+}
+
+class Cast extends Expr{
+    constructor(id, expr, type){
+        super(id)
+        this.expr = expr
+        this.type = type
+    }
+
+    toString(){
+        return this.expr.toString()
+    }
+
+    interpret(context){
+        const expr = this.expr.interpret(context)
+        return new Literal(null, this.type, expr).interpret()
     }
 }
 
@@ -182,4 +203,5 @@ module.exports = {
     Literal,
     Variable,
     Identifier,
+    Cast,
 }

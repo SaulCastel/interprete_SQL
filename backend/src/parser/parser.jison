@@ -193,17 +193,24 @@ select_from:
 ;
 
 selection:
-    selection ',' identifier asign_alias
+    selection ',' return_expr asign_alias
     {
         $$ = $1
         $$.push([$3, $4])
     }
     |
-    identifier asign_alias
+    return_expr asign_alias
     {
         $$ = []
         $$.push([$1, $2])
     }
+;
+
+return_expr:
+    identifier
+    {$$ = new Expr.Identifier(nodeId++, $1)}
+    |
+    native_func
 ;
 
 asign_alias:
@@ -255,7 +262,7 @@ condition:
 
 column_name:
     identifier
-    {$$ = new Expr.Identifier(nodeId++, $1)}
+    {$$ = new Expr.Variable(nodeId++, $1)}
 ;
 
 cond_expr:
@@ -286,6 +293,11 @@ cond_expr:
     {$$ = new Expr.Variable(nodeId++, $2)}
 ;
 
+native_func:
+    CAST '(' extended_expr AS type ')'
+    {$$ = new Expr.Cast(nodeId++, $3, $5)}
+;
+
 update:
     UPDATE identifier SET update_list where
 ;
@@ -302,6 +314,13 @@ truncate:
 
 delete_from:
     DELETE FROM identifier where
+;
+
+extended_expr:
+    identifier
+    {$$ = new Expr.Identifier(nodeId++, $1)}
+    |
+    expr
 ;
 
 expr:
