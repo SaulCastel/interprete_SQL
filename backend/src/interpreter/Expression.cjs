@@ -18,6 +18,10 @@ class Binary extends Expr{
         this.right = right
     }
 
+    toString(){
+        return this.left.toString() + this.op + this.right.toString()
+    }
+
     _genDOT(){
         let dot = ''
         dot += this.left._genDOT()
@@ -71,6 +75,10 @@ class Unary extends Expr{
         this.operand = operand
     }
 
+    toString(){
+        return this.operator + this.operand.toString()
+    }
+
     _genDOT(){
         let dot = ''
         dot += this.operand._genDOT()
@@ -97,6 +105,10 @@ class Group extends Expr{
         this.expr = expr
     }
 
+    toString(){
+        return this.expr.toString()
+    }
+
     _genDOT(){
         let dot = ''
         dot += this.expr._genDOT()
@@ -119,6 +131,10 @@ class Literal extends Expr{
         super(id)
         this.type = type
         this.value = value
+    }
+
+    toString(){
+        return this.value.toString()
     }
 
     _genDOT(){
@@ -155,6 +171,10 @@ class Variable extends Expr{
         this.name = name
     }
 
+    toString(){
+        return '@'+this.name
+    }
+
     _genDOT(){}
 
     interpret(context){
@@ -187,7 +207,7 @@ class Cast extends Expr{
     }
 
     toString(){
-        return this.expr.toString()
+        return `cast ${this.expr.toString()} as ${this.type}`
     }
 
     interpret(context){

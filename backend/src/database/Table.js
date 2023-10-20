@@ -39,7 +39,58 @@ export default class Table{
         this.cardinality++
     }
 
-    //para delete hay que poner this.cardinality--
+    update(selection, condition, context){
+        const newValues = this.getNewValues(selection, context)
+        const selected = Object.keys(newValues)
+        for(let i = 0; i < this.cardinality; i++){
+            const row = this.getRowAtIndex(i)
+            const header = this.getHeaderContext(row, context)
+            const result = condition.interpret(header).valueOf()
+            if(result){
+                for(const col of selected){
+                    this.columns[col].values[i] = newValues[col]
+                }
+            }
+        }
+    }
+
+    truncate(){
+        const columns = Object.keys(this.columns)
+        for(const col of columns){
+            this.columns[col].values = []
+        }
+        this.cardinality = 0
+    }
+
+    delete(condition, context){
+        const columns = Object.keys(this.columns)
+        const records = []
+        for(let i = 0; i < this.cardinality; i++){
+            const row = this.getRowAtIndex(i)
+            const header = this.getHeaderContext(row, context)
+            const result = condition.interpret(header).valueOf()
+            if(!result){
+                records.push(row)
+            }
+        }
+        this.truncate()
+        let newCardinality = 0
+        for(const record of records){
+            for(let i = 0; i < columns.length; i++){
+                this.columns[columns[i]].values.push(record[i])
+            }
+            newCardinality++
+        }
+        this.cardinality = newCardinality
+    }
+
+    getNewValues(selection, context){
+        const newValues = {}
+        for(const column of selection){
+            newValues[column[0]] = column[1].interpret(context)
+        }
+        return newValues
+    }
 
     select(selection, condition, context){
         const records = []

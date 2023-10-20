@@ -79,50 +79,50 @@ class Set extends Stmt{
 }
 
 class CreateTable extends Stmt{
-    constructor(id, tableId, columns){
+    constructor(id, tableID, columns){
         super(id)
-        this.tableId = tableId
+        this.tableID = tableID
         this.columns = columns
     }
 
     _genDOT(){}
 
     interpret(context, state){
-        state.database.createTable(this.tableId, this.columns)
+        state.database.createTable(this.tableID, this.columns)
     }
 }
 
 class AlterTable extends Stmt{
-    constructor(id, tableId, action){
+    constructor(id, tableID, action){
         super(id)
-        this.tableId = tableId
+        this.tableID = tableID
         this.action = action
     }
 
     _genDOT(){}
 
     interpret(context, state){
-        state.database.alterTable(this.tableId, this.action)
+        state.database.alterTable(this.tableID, this.action)
     }
 }
 
 class DropTable extends Stmt{
-    constructor(id, tableId){
+    constructor(id, tableID){
         super(id)
-        this.tableId = tableId
+        this.tableID = tableID
     }
 
     _genDOT(){}
 
     interpret(context, state){
-        state.database.dropTable(this.tableId)
+        state.database.dropTable(this.tableID)
     }
 }
 
 class InsertInto extends Stmt{
-    constructor(id, tableId, columns, values){
+    constructor(id, tableID, columns, values){
         super(id)
-        this.tableId = tableId
+        this.tableID = tableID
         this.columns = columns
         this.values = values
     }
@@ -130,14 +130,14 @@ class InsertInto extends Stmt{
     _genDOT(){}
 
     interpret(context, state){
-        state.database.insertInto(this.tableId, this.columns, this.values, context)
+        state.database.insertInto(this.tableID, this.columns, this.values, context)
     }
 }
 
 class SelectFrom extends Stmt{
-    constructor(id, tableId, selection, condition){
+    constructor(id, tableID, selection, condition){
         super(id)
-        this.tableId = tableId
+        this.tableID = tableID
         this.selection = selection
         this.condition = condition
     }
@@ -146,13 +146,82 @@ class SelectFrom extends Stmt{
 
     interpret(context, state){
         const result = state.database.selectFrom(
-            this.tableId,
+            this.tableID,
             this.selection,
             this.condition, 
             context
         )
         state.messages.push(`${result.records.length} registro(s) seleccionado(s)\n`)
         state.queries.push(result)
+    }
+}
+
+class Select extends Stmt{
+    constructor(id, selection){
+        super(id)
+        this.selection = selection
+    }
+
+    interpret(context, state){
+        const result = {
+            header: [],
+            records: []
+        }
+        const record = []
+        for(const expr of this.selection){
+            const value = expr[0].interpret(context)
+            record.push(value.toString())
+            const alias = expr[1]
+            if(alias){
+                result.header.push(alias)
+            }
+            else{
+                result.header.push(expr[0].toString())
+            }
+        }
+        result.records.push(record)
+        state.queries.push(result)
+    }
+}
+
+class UpdateTable extends Stmt{
+    constructor(id, tableID, selection, condition){
+        super(id)
+        this.tableID = tableID
+        this.selection = selection
+        this.condition = condition
+    }
+
+    interpret(context, state){
+        state.database.updateTable(
+            this.tableID,
+            this.selection,
+            this.condition,
+            context
+        )
+    }
+}
+
+class TruncateTable extends Stmt{
+    constructor(id, tableID){
+        super(id)
+        this.tableID = tableID
+    }
+
+    interpret(context, state){
+        state.database.truncateTable(this.tableID)
+    }
+}
+
+class DeleteFrom extends Stmt{
+    constructor(id, tableID, condition){
+        super(id)
+        this.tableID = tableID
+        this.condition = condition
+    }
+
+    interpret(context, state){
+        state.database.deleteFrom(this.tableID, this.condition, context)
     }
 }
 
@@ -166,4 +235,8 @@ module.exports = {
     DropTable,
     InsertInto,
     SelectFrom,
+    Select,
+    UpdateTable,
+    TruncateTable,
+    DeleteFrom,
 }

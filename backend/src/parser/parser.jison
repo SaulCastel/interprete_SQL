@@ -44,7 +44,7 @@ stmt:
     drop_table
     |
     PRINT expr
-    {$$ = new Stmt.Print(nodeId++, $2)}
+    {$$ = new Stmt.Print(treeID++, $2)}
     |
     select_from
     |
@@ -61,7 +61,7 @@ stmt:
 
 var_declaration:
     DECLARE var_list
-    {$$ = new Stmt.Declare(nodeId++, $2)}
+    {$$ = new Stmt.Declare(treeID++, $2)}
 ;
 
 var_list:
@@ -80,17 +80,17 @@ var_list:
 
 var_default:
     DECLARE '@' identifier type DEFAULT expr
-    {$$ = new Stmt.DeclareDefault(nodeId++, $3, $4, $6)}
+    {$$ = new Stmt.DeclareDefault(treeID++, $3, $4, $6)}
 ;
 
 var_assignment:
     SET '@' identifier '=' expr
-    {$$ = new Stmt.Set(nodeId++, $3, $5)}
+    {$$ = new Stmt.Set(treeID++, $3, $5)}
 ;
 
 create_table:
     CREATE TABLE identifier '(' col_declaration ')'
-    {$$ = new Stmt.CreateTable(nodeId++, $3, $5)}
+    {$$ = new Stmt.CreateTable(treeID++, $3, $5)}
 ;
 
 col_declaration:
@@ -109,7 +109,7 @@ col_declaration:
 
 alter_table:
     ALTER TABLE identifier alter_action
-    {$$ = new Stmt.AlterTable(nodeId++, $3, $4)}
+    {$$ = new Stmt.AlterTable(treeID++, $3, $4)}
 ;
 
 alter_action:
@@ -128,13 +128,13 @@ alter_action:
 
 drop_table:
     DROP TABLE identifier
-    {$$ = new Stmt.DropTable(nodeId++, $3)}
+    {$$ = new Stmt.DropTable(treeID++, $3)}
 ;
 
 insert_into:
     INSERT INTO identifier '(' column_list ')'
     VALUES '(' value_list ')'
-    {$$ = new Stmt.InsertInto(nodeId++, $3, $5, $9)}
+    {$$ = new Stmt.InsertInto(treeID++, $3, $5, $9)}
 ;
 
 column_list:
@@ -166,30 +166,16 @@ value_list:
 ;
 
 select_print:
-    SELECT print_list
-    {$$ = new Stmt.Select(nodeId++, $2)}
-;
-
-print_list:
-    print_list ',' expr asign_alias
-    {
-        $$ = $1
-        $$.push([$3, $4])
-    }
-    |
-    expr asign_alias
-    {
-        $$ = []
-        $$.push([$1, $2])
-    }
+    SELECT selection
+    {$$ = new Stmt.Select(treeID++, $2)}
 ;
 
 select_from:
     SELECT '*' FROM identifier where
-    {$$ = new Stmt.SelectFrom(nodeId++, $4, $2, $5)}
+    {$$ = new Stmt.SelectFrom(treeID++, $4, $2, $5)}
     |
     SELECT selection FROM identifier where
-    {$$ = new Stmt.SelectFrom(nodeId++, $4, $2, $5)}
+    {$$ = new Stmt.SelectFrom(treeID++, $4, $2, $5)}
 ;
 
 selection:
@@ -208,9 +194,11 @@ selection:
 
 return_expr:
     identifier
-    {$$ = new Expr.Identifier(nodeId++, $1)}
+    {$$ = new Expr.Identifier(treeID++, $1)}
     |
     native_func
+    |
+    expr
 ;
 
 asign_alias:
@@ -232,173 +220,184 @@ where:
 
 conditions:
     conditions AND condition
-    {$$ = new Expr.Binary(nodeId++, $1, 'AND', $3)}
+    {$$ = new Expr.Binary(treeID++, $1, 'AND', $3)}
     |
     conditions OR condition
-    {$$ = new Expr.Binary(nodeId++, $1, 'OR', $3)}
+    {$$ = new Expr.Binary(treeID++, $1, 'OR', $3)}
     |
     condition
 ;
 
 condition:
     column_name '=' cond_expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     column_name '!=' cond_expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     column_name '<' cond_expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     column_name '<=' cond_expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     column_name '>' cond_expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     column_name '>=' cond_expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
 ;
 
 column_name:
     identifier
-    {$$ = new Expr.Variable(nodeId++, $1)}
+    {$$ = new Expr.Variable(treeID++, $1)}
 ;
 
 cond_expr:
     cond_expr '+' cond_expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     cond_expr '-' cond_expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     cond_expr '*' cond_expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     cond_expr '/' cond_expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     cond_expr '%' cond_expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     '-' cond_expr %prec UMINUS
-    {$$ = new Expr.Unary(nodeId++, $1, $2)}
+    {$$ = new Expr.Unary(treeID++, $1, $2)}
     |
     '(' cond_expr ')'
-    {$$ = new Expr.Group(nodeId++, $2)}
+    {$$ = new Expr.Group(treeID++, $2)}
     |
     literal
     |
     '@' identifier
-    {$$ = new Expr.Variable(nodeId++, $2)}
+    {$$ = new Expr.Variable(treeID++, $2)}
 ;
 
 native_func:
     CAST '(' extended_expr AS type ')'
-    {$$ = new Expr.Cast(nodeId++, $3, $5)}
+    {$$ = new Expr.Cast(treeID++, $3, $5)}
 ;
 
 update:
     UPDATE identifier SET update_list where
+    {$$ = new Stmt.UpdateTable(treeID++, $2, $4, $5)}
 ;
 
 update_list:
     update_list ',' identifier '=' expr
+    {
+        $$ = $1
+        $$.push([$3, $5])
+    }
     |
     identifier '=' expr
+    {
+        $$ = []
+        $$.push([$1, $3])
+    }
 ;
 
 truncate:
     TRUNCATE TABLE identifier
+    {$$ = new Stmt.TruncateTable(treeID++, $3)}
 ;
 
 delete_from:
     DELETE FROM identifier where
+    {$$ = new Stmt.DeleteFrom(treeID++, $3, $4)}
 ;
 
 extended_expr:
     identifier
-    {$$ = new Expr.Identifier(nodeId++, $1)}
+    {$$ = new Expr.Identifier(treeID++, $1)}
     |
     expr
 ;
 
 expr:
     expr '+' expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     expr '-' expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     expr '*' expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     expr '/' expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     expr '%' expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     expr '=' expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     expr '!=' expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     expr '<' expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     expr '<=' expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     expr '>' expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     expr '>=' expr
-    {$$ = new Expr.Binary(nodeId++, $1, $2, $3)}
+    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
     |
     expr AND expr
-    {$$ = new Expr.Binary(nodeId++, $1, 'AND', $3)}
+    {$$ = new Expr.Binary(treeID++, $1, 'AND', $3)}
     |
     expr OR expr
-    {$$ = new Expr.Binary(nodeId++, $1, 'OR', $3)}
+    {$$ = new Expr.Binary(treeID++, $1, 'OR', $3)}
     |
     '-' expr %prec UMINUS
-    {$$ = new Expr.Unary(nodeId++, $1, $2)}
+    {$$ = new Expr.Unary(treeID++, $1, $2)}
     |
     NOT expr
-    {$$ = new Expr.Unary(nodeId++, 'NOT', $2)}
+    {$$ = new Expr.Unary(treeID++, 'NOT', $2)}
     |
     '(' expr ')'
-    {$$ = new Expr.Group(nodeId++, $2)}
+    {$$ = new Expr.Group(treeID++, $2)}
     |
     literal
     |
     '@' identifier
-    {$$ = new Expr.Variable(nodeId++, $2)}
+    {$$ = new Expr.Variable(treeID++, $2)}
 ;
 
 literal:
     INT_LITERAL
-    {$$ = new Expr.Literal(nodeId++, 'INT', $1)}
+    {$$ = new Expr.Literal(treeID++, 'INT', $1)}
     |
     DOUBLE_LITERAL
-    {$$ = new Expr.Literal(nodeId++, 'DOUBLE', $1)}
+    {$$ = new Expr.Literal(treeID++, 'DOUBLE', $1)}
     |
     DATE_LITERAL
-    {$$ = new Expr.Literal(nodeId++, 'DATE', $1)}
+    {$$ = new Expr.Literal(treeID++, 'DATE', $1)}
     |
     string_literal
-    {$$ = new Expr.Literal(nodeId++, 'STRING', $1)}
+    {$$ = new Expr.Literal(treeID++, 'STRING', $1)}
     |
     TRUE
-    {$$ = new Expr.Literal(nodeId++, 'BOOLEAN', $1)}
+    {$$ = new Expr.Literal(treeID++, 'BOOLEAN', $1)}
     |
     FALSE
-    {$$ = new Expr.Literal(nodeId++, 'BOOLEAN', $1)}
+    {$$ = new Expr.Literal(treeID++, 'BOOLEAN', $1)}
     |
     NULL
-    {$$ = new Expr.Literal(nodeId++, 'NULL', $1)}
+    {$$ = new Expr.Literal(treeID++, 'NULL', $1)}
 ;
 
 type:
@@ -435,4 +434,4 @@ string_literal:
 
 const Expr = require('../interpreter/Expression.cjs');
 const Stmt = require('../interpreter/Statement.cjs');
-var nodeId = 0;
+var treeID = 0;

@@ -13,19 +13,19 @@ export default class Database{
         delete this.tables[id]
     }
 
-    alterTable(tableId, action){
+    alterTable(tableID, action){
         switch(action[0]){
             case 'ADD':
-                this.tables[tableId].addCol(action[1], action[2])
+                this.tables[tableID].addCol(action[1], action[2])
                 break;
             case 'DROP':
-                this.tables[tableId].dropCol(action[1])
+                this.tables[tableID].dropCol(action[1])
                 break;
             case 'RENAME':
-                this.renameTable(tableId, action[1])
+                this.renameTable(tableID, action[1])
                 break;
             case 'RENAME_C':
-                this.tables[tableId].renameCol(action[1], action[2])
+                this.tables[tableID].renameCol(action[1], action[2])
                 break;
         }
     }
@@ -37,11 +37,23 @@ export default class Database{
         delete this.tables[id]
     }
 
-    insertInto(tableId, columns, values, context){
-        this.tables[tableId].insert(columns, values, context)
+    insertInto(tableID, columns, values, context){
+        this.tables[tableID].insert(columns, values, context)
     }
 
-    selectFrom(tableId, selection, condition, context){
-        return this.tables[tableId].select(selection, condition, context)
+    selectFrom(tableID, selection, condition, context){
+        return this.tables[tableID].select(selection, condition, context)
+    }
+
+    updateTable(tableID, selection, condition, context){
+        this.tables[tableID].update(selection, condition, context)
+    }
+
+    truncateTable(tableID){
+        this.tables[tableID].truncate()
+    }
+
+    deleteFrom(tableID, condition, context){
+        this.tables[tableID].delete(condition, context)
     }
 }
