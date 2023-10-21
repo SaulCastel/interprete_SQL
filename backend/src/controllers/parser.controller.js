@@ -10,7 +10,9 @@ export const interpret = (req, res) => {
     let state = {
         messages: [],
         database: new Database(),
-        queries: []
+        queries: [],
+        contextCount: 0,
+        flag: null
     }
     for(const stmt of stmts){
         stmt.interpret(global, state)

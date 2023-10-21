@@ -31,12 +31,6 @@ stmts:
 ;
 
 stmt:
-    var_declaration
-    |
-    var_default
-    |
-    var_assignment
-    |
     create_table
     |
     alter_table
@@ -57,6 +51,57 @@ stmt:
     delete_from
     |
     truncate
+    |
+    block_stmt
+    |
+    for_stmt
+    |
+    while_stmt
+;
+
+block_stmt:
+    BEGIN extended_stmts END
+    {$$ = new Stmt.Block(treeID++, $2)}
+;
+
+extended_stmts:
+    extended_stmts extended_stmt ';'
+    {
+        $$ = $1
+        $$.push($2)
+    }
+    |
+    extended_stmt ';'
+    {
+        $$ = []
+        $$.push($1)
+    }
+;
+
+extended_stmt:
+    var_declaration
+    |
+    var_default
+    |
+    var_assignment
+    |
+    BREAK
+    {$$ = new Stmt.Break(treeID++)}
+    |
+    CONTINUE
+    {$$ = new Stmt.Continue(treeID++)}
+    |
+    stmt
+;
+
+for_stmt:
+    FOR identifier IN INT_LITERAL '..' INT_LITERAL block_stmt
+    {$$ = new Stmt.For(treeID++, $2, $4, $6, $7)}
+;
+
+while_stmt:
+    WHILE expr block_stmt
+    {$$ = new Stmt.While(treeID++, $2, $3)}
 ;
 
 var_declaration:
@@ -179,26 +224,17 @@ select_from:
 ;
 
 selection:
-    selection ',' return_expr asign_alias
+    selection ',' expr asign_alias
     {
         $$ = $1
         $$.push([$3, $4])
     }
     |
-    return_expr asign_alias
+    expr asign_alias
     {
         $$ = []
         $$.push([$1, $2])
     }
-;
-
-return_expr:
-    identifier
-    {$$ = new Expr.Identifier(treeID++, $1)}
-    |
-    native_func
-    |
-    expr
 ;
 
 asign_alias:
@@ -275,14 +311,14 @@ cond_expr:
     '(' cond_expr ')'
     {$$ = new Expr.Group(treeID++, $2)}
     |
-    literal
-    |
     '@' identifier
     {$$ = new Expr.Variable(treeID++, $2)}
+    |
+    literal
 ;
 
 native_func:
-    CAST '(' extended_expr AS type ')'
+    CAST '(' expr AS type ')'
     {$$ = new Expr.Cast(treeID++, $3, $5)}
 ;
 
@@ -313,13 +349,6 @@ truncate:
 delete_from:
     DELETE FROM identifier where
     {$$ = new Stmt.DeleteFrom(treeID++, $3, $4)}
-;
-
-extended_expr:
-    identifier
-    {$$ = new Expr.Identifier(treeID++, $1)}
-    |
-    expr
 ;
 
 expr:
@@ -371,10 +400,15 @@ expr:
     '(' expr ')'
     {$$ = new Expr.Group(treeID++, $2)}
     |
-    literal
-    |
     '@' identifier
     {$$ = new Expr.Variable(treeID++, $2)}
+    |
+    identifier
+    {$$ = new Expr.Identifier(treeID++, $1)}
+    |
+    native_func
+    |
+    literal
 ;
 
 literal:

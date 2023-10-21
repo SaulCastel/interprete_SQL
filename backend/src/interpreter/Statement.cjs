@@ -1,3 +1,5 @@
+const Context = require('./Context.cjs')
+
 class Stmt{
     constructor(id){
         this.id = id
@@ -386,6 +388,111 @@ class DeleteFrom extends Stmt{
     }
 }
 
+class Block extends Stmt{
+    constructor(id, stmts){
+        super(id)
+        this.stmts = stmts
+    }
+
+    _genDOT(){}
+
+    interpret(context, state, createContext=true){
+        if(createContext){
+            context = new Context(`Block ${state.contextCount++}`, context)
+        }
+        for(const stmt of this.stmts){
+            stmt.interpret(context, state)
+            if(state.flag){
+                break
+            }
+        }
+    }
+}
+
+class Break extends Stmt{
+    constructor(id){
+        super(id)
+    }
+
+    _genDOT(){}
+
+    interpret(context, state){
+        state.flag = 'BREAK'
+    }
+}
+
+class Continue extends Stmt{
+    constructor(id){
+        super(id)
+    }
+
+    _genDOT(){}
+
+    interpret(context, state){
+        state.flag = 'CONTINUE'
+    }
+}
+
+class For extends Stmt{
+    constructor(id, iterator, lowerLimit, upperLimit, block){
+        super(id)
+        this.iterator = iterator
+        this.lowerLimit = lowerLimit
+        this.upperLimit = upperLimit
+        this.block = block
+    }
+
+    _genDOT(){}
+
+    interpret(context, state){
+        const local = new Context(`Block ${state.contextCount++}`, context)
+        local.set(this.iterator, 'INT', this.lowerLimit)
+        for(let i = this.lowerLimit.valueOf(); i <= this.upperLimit.valueOf(); i++){
+            if(state.flag === 'BREAK'){
+                state.flag = null
+                break
+            }
+            else if(state.flag === 'CONTINUE'){
+                state.flag = null
+                continue
+            }
+            else{
+                this.block.interpret(local, state, false)
+                local.update(this.iterator, i+1)
+            }
+        }
+    }
+}
+
+class While extends Stmt{
+    constructor(id, condition, block){
+        super(id)
+        this.condition = condition
+        this.block = block
+    }
+
+    _genDOT(){}
+
+    interpret(context, state){
+        const local = new Context(`Block ${state.contextCount++}`, context)
+        let result = this.condition.interpret(local).valueOf()
+        while(result){
+            if(state.flag === 'BREAK'){
+                state.flag = null
+                break
+            }
+            else if(state.flag === 'CONTINUE'){
+                state.flag = null
+                continue
+            }
+            else{
+                this.block.interpret(local, state, false)
+                result = this.condition.interpret(local).valueOf()
+            }
+        }
+    }
+}
+
 module.exports = {
     Print,
     Declare,
@@ -400,4 +507,9 @@ module.exports = {
     UpdateTable,
     TruncateTable,
     DeleteFrom,
+    Block,
+    For,
+    While,
+    Break,
+    Continue,
 }
