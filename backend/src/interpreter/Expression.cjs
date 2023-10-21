@@ -26,7 +26,7 @@ class Binary extends Expr{
         let dot = ''
         dot += this.left._genDOT()
         dot += this.right._genDOT()
-        dot += `\t"${this.id}"[label="Binary"]\n`
+        dot += `\t"${this.id}"[label="BinaryExpression"]\n`
         dot += `\t"${this.id}op"[label="${this.op}"]\n`
         dot += `\t"${this.id}" -- "${this.left.id}"\n`
         dot += `\t"${this.id}" -- "${this.id}op"\n`
@@ -82,7 +82,7 @@ class Unary extends Expr{
     _genDOT(){
         let dot = ''
         dot += this.operand._genDOT()
-        dot += `\t"${this.id}"[label="Unary"]\n`
+        dot += `\t"${this.id}"[label="UnaryExpression"]\n`
         dot += `\t"${this.id}op"[label="${this.operator}"]\n`
         dot += `\t"${this.id}" -- "${this.id}op"\n`
         dot += `\t"${this.id}" -- "${this.operand.id}"\n`
@@ -175,7 +175,15 @@ class Variable extends Expr{
         return '@'+this.name
     }
 
-    _genDOT(){}
+    _genDOT(){
+        let dot = ''
+        dot += `\t"${this.id}"[label="Variable"]\n`
+        dot += `\t"${this.id}@"[label="${this.name}"]\n`
+        dot += `\t"${this.id}v"[label="${this.name}"]\n`
+        dot += `\t"${this.id}" -- ${this.id}@\n`
+        dot += `\t"${this.id}" -- ${this.id}v\n`
+        return dot
+    }
 
     interpret(context){
         return context.get(this.name)
@@ -192,7 +200,13 @@ class Identifier extends Expr{
         return this.name
     }
 
-    _genDOT(){}
+    _genDOT(){
+        let dot = ''
+        dot += `\t"${this.id}"[label="Identifier"]\n`
+        dot += `\t"${this.id}v"[label="${this.name}"]\n`
+        dot += `\t"${this.id}" -- ${this.id}v\n`
+        return dot
+    }
 
     interpret(context){
         return context.get(this.name)
@@ -208,6 +222,20 @@ class Cast extends Expr{
 
     toString(){
         return `cast ${this.expr.toString()} as ${this.type}`
+    }
+
+    _genDOT(){
+        let dot = ''
+        dot += this.expr._genDOT()
+        dot += `\t"${this.id}"[label="FunctionCall"]\n`
+        dot += `\t"${this.id}cast"[label="Cast"]\n`
+        dot += `\t"${this.id}as"[label="AS"]\n`
+        dot += `\t"${this.id}t"[label="${this.type}"]\n`
+        dot += `\t"${this.id}" -- "${this.id}cast"\n`
+        dot += `\t"${this.id}" -- "${this.expr.id}"\n`
+        dot += `\t"${this.id}" -- "${this.id}as"\n`
+        dot += `\t"${this.id}" -- "${this.id}t"\n`
+        return dot
     }
 
     interpret(context){

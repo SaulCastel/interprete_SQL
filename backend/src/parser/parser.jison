@@ -250,7 +250,7 @@ condition:
 
 column_name:
     identifier
-    {$$ = new Expr.Variable(treeID++, $1)}
+    {$$ = new Expr.Identifier(treeID++, $1)}
 ;
 
 cond_expr:

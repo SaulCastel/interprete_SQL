@@ -173,7 +173,7 @@ break;
 case 37: case 38:
 this.$ = new Stmt.SelectFrom(treeID++, $$[$0-1], $$[$0-3], $$[$0])
 break;
-case 41: case 74:
+case 41: case 58: case 74:
 this.$ = new Expr.Identifier(treeID++, $$[$0])
 break;
 case 44: case 45: case 47:
@@ -188,14 +188,14 @@ break;
 case 52: case 53: case 54: case 55: case 56: case 57: case 59: case 60: case 61: case 62: case 63: case 76: case 77: case 78: case 79: case 80: case 81: case 82: case 83: case 84: case 85: case 86:
 this.$ = new Expr.Binary(treeID++, $$[$0-2], $$[$0-1], $$[$0])
 break;
-case 58: case 67: case 93:
-this.$ = new Expr.Variable(treeID++, $$[$0])
-break;
 case 64: case 89:
 this.$ = new Expr.Unary(treeID++, $$[$0-1], $$[$0])
 break;
 case 65: case 91:
 this.$ = new Expr.Group(treeID++, $$[$0-1])
+break;
+case 67: case 93:
+this.$ = new Expr.Variable(treeID++, $$[$0])
 break;
 case 68:
 this.$ = new Expr.Cast(treeID++, $$[$0-3], $$[$0-1])
