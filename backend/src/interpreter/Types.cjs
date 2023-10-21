@@ -9,7 +9,7 @@ class TYPE{
 class INT extends TYPE{
     constructor(type, value){
         super(type)
-        this.value = Number(value)
+        this.value = Math.round(value)
     }
     valueOf(){
         return this.value
@@ -22,13 +22,13 @@ class INT extends TYPE{
 class DOUBLE extends TYPE{
     constructor(type, value){
         super(type)
-        this.value = parseFloat(value)
+        this.value = Number(value)
     }
     valueOf(){
         return this.value
     }
     toString(){
-        return String(this.value)
+        return this.value.toFixed(4)
     }
 }
 

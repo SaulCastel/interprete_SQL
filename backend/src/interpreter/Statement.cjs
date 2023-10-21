@@ -175,6 +175,7 @@ class DropTable extends Stmt{
     }
 
     _genDOT(){
+        let dot = ''
         dot += `\t"${this.id}"[label="DROP"]\n`
         dot += `\t"${this.id}table"[label="TABLE"]\n`
         dot += `\t"${this.id}i"[label="${this.tableID}"]\n`
@@ -199,6 +200,7 @@ class InsertInto extends Stmt{
     }
 
     _genDOT(){
+        let dot = ''
         dot += `\t"${this.id}"[label="INSERT"]\n`
         dot += `\t"${this.id}into"[label="INTO"]\n`
         dot += `\t"${this.id}i"[label="${this.tableID}"]\n`
@@ -437,8 +439,8 @@ class For extends Stmt{
     constructor(id, iterator, lowerLimit, upperLimit, block){
         super(id)
         this.iterator = iterator
-        this.lowerLimit = lowerLimit
-        this.upperLimit = upperLimit
+        this.lowerLimit = Number(lowerLimit)
+        this.upperLimit = Number(upperLimit)
         this.block = block
     }
 
@@ -447,8 +449,12 @@ class For extends Stmt{
     interpret(context, state){
         const local = new Context(`Block ${state.contextCount++}`, context)
         local.set(this.iterator, 'INT', this.lowerLimit)
-        for(let i = this.lowerLimit.valueOf(); i <= this.upperLimit.valueOf(); i++){
-            if(state.flag === 'BREAK'){
+        for(let i = this.lowerLimit; i <= this.upperLimit; i++){
+            if(!state.flag){
+                this.block.interpret(local, state, false)
+                local.update(this.iterator, i+1)
+            }
+            else if(state.flag === 'BREAK'){
                 state.flag = null
                 break
             }
@@ -456,11 +462,8 @@ class For extends Stmt{
                 state.flag = null
                 continue
             }
-            else{
-                this.block.interpret(local, state, false)
-                local.update(this.iterator, i+1)
-            }
         }
+        state.flag = null
     }
 }
 
@@ -477,7 +480,11 @@ class While extends Stmt{
         const local = new Context(`Block ${state.contextCount++}`, context)
         let result = this.condition.interpret(local).valueOf()
         while(result){
-            if(state.flag === 'BREAK'){
+            if(!state.flag){
+                this.block.interpret(local, state, false)
+                result = this.condition.interpret(local).valueOf()
+            }
+            else if(state.flag === 'BREAK'){
                 state.flag = null
                 break
             }
@@ -485,11 +492,8 @@ class While extends Stmt{
                 state.flag = null
                 continue
             }
-            else{
-                this.block.interpret(local, state, false)
-                result = this.condition.interpret(local).valueOf()
-            }
         }
+        state.flag = null
     }
 }
 
