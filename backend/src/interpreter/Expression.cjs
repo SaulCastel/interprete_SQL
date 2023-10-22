@@ -244,6 +244,130 @@ class Cast extends Expr{
     }
 }
 
+class Lower extends Expr{
+    constructor(id, expr){
+        super(id)
+        this.expr = expr
+    }
+
+    _genDOT(){
+        let dot = ''
+        return dot
+    }
+
+    interpret(context){
+        const string = this.expr.interpret(context)
+        const newString = string.toString().toLowerCase()
+        return new Types.STRING('STRING', newString)
+    }
+}
+
+class Upper extends Expr{
+    constructor(id, expr){
+        super(id)
+        this.expr = expr
+    }
+
+    _genDOT(){
+        let dot = ''
+        return dot
+    }
+
+    interpret(context){
+        const string = this.expr.interpret(context)
+        const newString = string.toString().toUpperCase()
+        return new Types.STRING('STRING', newString)
+    }
+}
+
+class Round extends Expr{
+    constructor(id, expr, decimals){
+        super(id)
+        this.expr = expr
+        this.decimals = decimals
+    }
+
+    _genDOT(){
+        let dot = ''
+        return dot
+    }
+
+    interpret(context){
+        const result = this.expr.interpret(context).valueOf()
+        let newNum
+        if(this.decimals){
+            const num = this.decimals.interpret(context).valueOf()
+            newNum = new Types.DOUBLE('DOUBLE', result)
+            newNum.setDecimals(num)
+        }
+        else{
+            newNum = new Types.INT('INT', Math.round(result))
+        }
+        return newNum
+    }
+}
+
+class Len extends Expr{
+    constructor(id, expr){
+        super(id)
+        this.expr = expr
+    }
+
+    _genDOT(){
+        let dot = ''
+        return dot
+    }
+
+    interpret(context){
+        const string = this.expr.interpret(context).toString()
+        return new Types.INT('INT', string.length)
+    }
+}
+
+class Truncate extends Expr{
+    constructor(id, expr, decimals){
+        super(id)
+        this.expr = expr
+        this.decimals = decimals
+    }
+
+    _genDOT(){
+        let dot = ''
+        return dot
+    }
+
+    interpret(context){
+        const result = this.expr.interpret(context).valueOf()
+        let newNum
+        if(this.decimals){
+            const num = this.decimals.interpret(context).valueOf()
+            newNum = new Types.DOUBLE('DOUBLE', result)
+            newNum.setDecimals(num)
+        }
+        else{
+            newNum = new Types.INT('INT', result)
+        }
+        return newNum
+    }
+}
+
+class TypeOf extends Expr{
+    constructor(id, expr){
+        super(id)
+        this.expr = expr
+    }
+
+    _genDOT(){
+        let dot = ''
+        return dot
+    }
+
+    interpret(context){
+        const result = this.expr.interpret(context)
+        return new Types.STRING('STRING', result.type)
+    }
+}
+
 module.exports = {
     Binary,
     Unary,
@@ -252,4 +376,10 @@ module.exports = {
     Variable,
     Identifier,
     Cast,
+    Lower,
+    Upper,
+    Round,
+    Len,
+    Truncate,
+    TypeOf,
 }

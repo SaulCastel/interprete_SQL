@@ -75,8 +75,10 @@ UPDATE personas SET verdadero_falso = false WHERE edad <= 200 AND verdadero_fals
 DELETE FROM personas WHERE nombre = "persona10" OR nombre = "persona20";
 -- Solo mostrar algunas columnas
 SELECT
-    nombre AS "Nombre de la persona",
+    UPPER(nombre) AS "Nombre de la persona",
     edad AS edad_de_persona,
+    ROUND(estatura) AS "Estatura redondeada",
+    TRUNCATE(estatura) AS "Estatura truncada",
     verdadero_falso AS booleano
 FROM personas;
 TRUNCATE TABLE personas;
@@ -90,6 +92,20 @@ VALUES
     1999-12-24
 );
 SELECT * from personas;
+BEGIN
+    DECLARE @num DOUBLE DEFAULT 3.513789141;
+    DECLARE @string VARCHAR DEFAULT "\\Hola, mundo!\\";
+    PRINT "Número original: " + CAST(@num AS VARCHAR);
+    PRINT "String original: " + @string;
+    PRINT "Tamaño de string: " + CAST(LEN(@string) AS VARCHAR);
+    PRINT "String en minusculas: " + LOWER(@STRING);
+    PRINT "String en mayusculas: " + UPPER(@sTRing);
+    PRINT "Redondear numero: " + CAST(ROUND(@num) AS VARCHAR);
+    PRINT "Tipo de dato después de redondear: " + TYPEOF(ROUND(@num));
+    PRINT "Redondear numero a 3 decimales: " + CAST(ROUND(@num, 3) AS VARCHAR);
+    PRINT "Truncar número: "+CAST(TRUNCATE(@num) AS VARCHAR);
+    PRINT "Truncar número a 3 decimales: "+CAST(TRUNCATE(@num, 3) AS VARCHAR);
+END;
 BEGIN
     DECLARE @mensaje VARCHAR;
     SET @mensaje = "\t\\Este es el \"fin\" de el \'Archivo\'\\\n";

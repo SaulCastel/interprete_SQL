@@ -355,6 +355,31 @@ cond_expr:
 native_func:
     CAST '(' expr AS type ')'
     {$$ = new Expr.Cast(treeID++, $3, $5)}
+    |
+    LOWER '(' expr ')'
+    {$$ = new Expr.Lower(treeID++, $3)}
+    |
+    UPPER '(' expr ')'
+    {$$ = new Expr.Upper(treeID++, $3)}
+    |
+    ROUND '(' expr option ')'
+    {$$ = new Expr.Round(treeID++, $3, $4)}
+    |
+    LEN '(' expr ')'
+    {$$ = new Expr.Len(treeID++, $3)}
+    |
+    TRUNCATE '(' expr option ')'
+    {$$ = new Expr.Truncate(treeID++, $3, $4)}
+    |
+    TYPEOF '(' expr ')'
+    {$$ = new Expr.TypeOf(treeID++, $3)}
+;
+
+option:
+    ',' expr
+    {$$ = $2}
+    |
+    /* epsilon */
 ;
 
 update:

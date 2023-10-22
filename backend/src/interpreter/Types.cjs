@@ -13,7 +13,7 @@ class INT extends TYPE{
         this.setVal(value)
     }
     setVal(value){
-        this.value = Math.round(value)
+        this.value = Math.trunc(value)
     }
     valueOf(){
         return this.value
@@ -27,15 +27,19 @@ class DOUBLE extends TYPE{
     constructor(type, value){
         super(type)
         this.setVal(value)
+        this.setDecimals(8)
     }
     setVal(value){
         this.value = Number(value)
+    }
+    setDecimals(num){
+        this.decimals = num
     }
     valueOf(){
         return this.value
     }
     toString(){
-        return this.value.toFixed(4)
+        return this.value.toFixed(this.decimals)
     }
 }
 
