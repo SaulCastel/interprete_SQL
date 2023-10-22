@@ -7,9 +7,10 @@
 "--".*                                                      /* no hacer nada */
 
 "/*"                                                        this.pushState('comment');
+<comment>[^*\n]+                                            /* no hacer nada */
+<comment>"*"                                                /* no hacer nada */
+<comment>\n                                                 yylineno++
 <comment>"*/"                                               this.popState();
-<comment>[^\n]+                                             /* no hacer nada */
-<comment>\n                                                 /* no hacer nada */
 
 "true"                                                      return 'TRUE'
 "false"                                                     return 'FALSE'

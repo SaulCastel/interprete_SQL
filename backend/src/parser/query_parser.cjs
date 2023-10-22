@@ -764,150 +764,152 @@ case 1:/* no hacer nada */
 break;
 case 2:this.pushState('comment');
 break;
-case 3:this.popState();
+case 3:/* no hacer nada */
 break;
 case 4:/* no hacer nada */
 break;
-case 5:/* no hacer nada */
+case 5:yy_.yylineno++
 break;
-case 6:return 96
+case 6:this.popState();
 break;
-case 7:return 97
+case 7:return 96
 break;
-case 8:return 37
+case 8:return 97
 break;
-case 9:return 42
+case 9:return 37
 break;
-case 10:return 43
+case 10:return 42
 break;
-case 11:return 45
+case 11:return 43
 break;
-case 12:return 46
+case 12:return 45
 break;
-case 13:return 50
+case 13:return 46
 break;
-case 14:return 46
+case 14:return 50
 break;
-case 15:return 52
+case 15:return 46
 break;
-case 16:return 53
+case 16:return 52
 break;
-case 17:return 55
+case 17:return 53
 break;
-case 18:return 54
+case 18:return 55
 break;
-case 19:return 56
+case 19:return 54
 break;
-case 20:return 72
+case 20:return 56
 break;
-case 21:return 74
+case 21:return 72
 break;
-case 22:return 93
+case 22:return 74
 break;
-case 23:return 99
+case 23:return 93
 break;
-case 24:return 100
+case 24:return 99
 break;
-case 25:return 101
+case 25:return 100
 break;
-case 26:return 102
+case 26:return 101
 break;
-case 27:return 103
+case 27:return 102
 break;
-case 28:return 98
+case 28:return 103
 break;
-case 29:return 11
+case 29:return 98
 break;
-case 30:return 57
+case 30:return 11
 break;
-case 31:return 58
+case 31:return 57
 break;
-case 32:return 60
+case 32:return 58
 break;
-case 33:return 62
+case 33:return 60
 break;
-case 34:return 65
+case 34:return 62
 break;
-case 35:return 70
+case 35:return 65
 break;
-case 36:return 68
+case 36:return 70
 break;
-case 37:return 89
+case 37:return 68
 break;
-case 38:return 91
+case 38:return 89
 break;
-case 39:return 92
+case 39:return 91
 break;
-case 40:return 88
+case 40:return 92
 break;
-case 41:return 22
+case 41:return 88
 break;
-case 42:return 24
+case 42:return 22
 break;
-case 43:return 31
+case 43:return 24
 break;
-case 44:return 33
+case 44:return 31
 break;
-case 45:return 36
+case 45:return 33
 break;
-case 46:return 29
+case 46:return 36
 break;
-case 47:return 30
+case 47:return 29
 break;
-case 48:return 35
+case 48:return 30
 break;
-case 49:return 7
+case 49:return 35
 break;
-case 50:return 40
+case 50:return 7
 break;
-case 51:return 39
+case 51:return 40
 break;
-case 52:return 47
+case 52:return 39
 break;
-case 53:return 49
+case 53:return 47
 break;
-case 54:return 82
+case 54:return 49
 break;
-case 55:return 83
+case 55:return 82
 break;
-case 56:return 64
+case 56:return 83
 break;
-case 57:return 84
+case 57:return 64
 break;
-case 58:return 85
+case 58:return 84
 break;
-case 59:return 44
+case 59:return 85
 break;
-case 60:return 80
+case 60:return 44
 break;
-case 61:return 81
+case 61:return 80
 break;
-case 62:return 78
+case 62:return 81
 break;
-case 63:return 79
+case 63:return 78
 break;
-case 64:return 77
+case 64:return 79
 break;
-case 65:return 95
+case 65:return 77
 break;
-case 66:return 94
+case 66:return 95
 break;
-case 67:return 34
+case 67:return 94
 break;
-case 68:return 105
+case 68:return 34
 break;
-case 69:return 104
+case 69:return 105
 break;
-case 70:return 5
+case 70:return 104
 break;
-case 71:return 'INVALID'
+case 71:return 5
 break;
-case 72:console.log(yy_.yytext);
+case 72:return 'INVALID'
+break;
+case 73:console.log(yy_.yytext);
 break;
 }
 },
-rules: [/^(?:\s+)/i,/^(?:--.*)/i,/^(?:\/\*)/i,/^(?:\*\/)/i,/^(?:[^\n]+)/i,/^(?:\n)/i,/^(?:true)/i,/^(?:false)/i,/^(?:declare)/i,/^(?:default)/i,/^(?:set)/i,/^(?:create)/i,/^(?:table)/i,/^(?:alter)/i,/^(?:table)/i,/^(?:add)/i,/^(?:drop)/i,/^(?:rename)/i,/^(?:column)/i,/^(?:to)/i,/^(?:and)/i,/^(?:or)/i,/^(?:not)/i,/^(?:int)/i,/^(?:double)/i,/^(?:date)/i,/^(?:varchar)/i,/^(?:boolean)/i,/^(?:null)/i,/^(?:print)/i,/^(?:insert)/i,/^(?:into)/i,/^(?:values)/i,/^(?:select)/i,/^(?:from)/i,/^(?:where)/i,/^(?:as)/i,/^(?:update)/i,/^(?:truncate)/i,/^(?:delete)/i,/^(?:cast)/i,/^(?:begin)/i,/^(?:end)/i,/^(?:for)/i,/^(?:in)/i,/^(?:while)/i,/^(?:break)/i,/^(?:continue)/i,/^(?:\.\.)/i,/^(?:;)/i,/^(?:@)/i,/^(?:,)/i,/^(?:\()/i,/^(?:\))/i,/^(?:\+)/i,/^(?:-)/i,/^(?:\*)/i,/^(?:\/)/i,/^(?:%)/i,/^(?:=)/i,/^(?:>)/i,/^(?:>=)/i,/^(?:<)/i,/^(?:<=)/i,/^(?:!=)/i,/^(?:(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01]))/i,/^(?:[0-9]+\.[0-9]+)/i,/^(?:[0-9]+)/i,/^(?:"(\\.|[^"\\])*")/i,/^(?:[a-z][a-z0-9_-]*)/i,/^(?:$)/i,/^(?:.)/i,/^(?:.)/i],
-conditions: {"comment":{"rules":[3,4,5],"inclusive":false},"INITIAL":{"rules":[0,1,2,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72],"inclusive":true}}
+rules: [/^(?:\s+)/i,/^(?:--.*)/i,/^(?:\/\*)/i,/^(?:[^*\n]+)/i,/^(?:\*)/i,/^(?:\n)/i,/^(?:\*\/)/i,/^(?:true)/i,/^(?:false)/i,/^(?:declare)/i,/^(?:default)/i,/^(?:set)/i,/^(?:create)/i,/^(?:table)/i,/^(?:alter)/i,/^(?:table)/i,/^(?:add)/i,/^(?:drop)/i,/^(?:rename)/i,/^(?:column)/i,/^(?:to)/i,/^(?:and)/i,/^(?:or)/i,/^(?:not)/i,/^(?:int)/i,/^(?:double)/i,/^(?:date)/i,/^(?:varchar)/i,/^(?:boolean)/i,/^(?:null)/i,/^(?:print)/i,/^(?:insert)/i,/^(?:into)/i,/^(?:values)/i,/^(?:select)/i,/^(?:from)/i,/^(?:where)/i,/^(?:as)/i,/^(?:update)/i,/^(?:truncate)/i,/^(?:delete)/i,/^(?:cast)/i,/^(?:begin)/i,/^(?:end)/i,/^(?:for)/i,/^(?:in)/i,/^(?:while)/i,/^(?:break)/i,/^(?:continue)/i,/^(?:\.\.)/i,/^(?:;)/i,/^(?:@)/i,/^(?:,)/i,/^(?:\()/i,/^(?:\))/i,/^(?:\+)/i,/^(?:-)/i,/^(?:\*)/i,/^(?:\/)/i,/^(?:%)/i,/^(?:=)/i,/^(?:>)/i,/^(?:>=)/i,/^(?:<)/i,/^(?:<=)/i,/^(?:!=)/i,/^(?:(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01]))/i,/^(?:[0-9]+\.[0-9]+)/i,/^(?:[0-9]+)/i,/^(?:"(\\.|[^"\\])*")/i,/^(?:[a-z][a-z0-9_-]*)/i,/^(?:$)/i,/^(?:.)/i,/^(?:.)/i],
+conditions: {"comment":{"rules":[3,4,5,6],"inclusive":false},"INITIAL":{"rules":[0,1,2,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73],"inclusive":true}}
 });
 /*
     Regex para string con caracteres de escape
