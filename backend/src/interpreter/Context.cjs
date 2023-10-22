@@ -8,7 +8,13 @@ class Context{
     }
 
     set(key, type, value){
-        this.symbols[key] = new Literal(null, type, value).interpret()
+        const symbol = this.get(key)
+        if(symbol){
+            symbol.setVal(value)
+        }
+        else{
+            this.symbols[key] = new Literal(null, type, value).interpret()
+        }
     }
 
     get(key){
@@ -19,14 +25,6 @@ class Context{
             }
         }
         return symbol
-    }
-
-    update(key, value){
-        const symbol = this.get(key)
-        if(symbol !== undefined){
-            const newSymbol = new Literal(null, symbol.type, value).interpret()
-            this.symbols[key] = newSymbol
-        }
     }
 }
 

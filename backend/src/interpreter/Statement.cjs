@@ -1,4 +1,5 @@
 const Context = require('./Context.cjs')
+const Binary = require('./Expression.cjs').Binary
 
 class Stmt{
     constructor(id){
@@ -112,7 +113,7 @@ class Set extends Stmt{
 
     interpret(context, state){
         const expr = this.expr.interpret(context)
-        context.update(this.key, expr)
+        context.set(this.key, expr.type, expr)
     }
 }
 
@@ -452,7 +453,7 @@ class For extends Stmt{
         for(let i = this.lowerLimit; i <= this.upperLimit; i++){
             if(!state.flag){
                 this.block.interpret(local, state, false)
-                local.update(this.iterator, i+1)
+                local.set(this.iterator,'INT', i+1)
             }
             else if(state.flag === 'BREAK'){
                 state.flag = null
@@ -497,6 +498,83 @@ class While extends Stmt{
     }
 }
 
+class If extends Stmt{
+    constructor(id, condition, stmts, elseBlock){
+        super(id)
+        this.condition = condition
+        this.stmts = stmts
+        this.elseBlock = elseBlock
+    }
+
+    _genDOT(){
+        let dot = ''
+        dot += `\t"${this.id}"[label="IF"]\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
+        dot += this.appendParent()
+        return dot
+    }
+
+    interpret(context, state){
+        const result = this.condition.interpret(context).valueOf()
+        if(result){
+            const local = new Context(`Block ${state.contextCount++}`, context)
+            for(const stmt of this.stmts){
+                stmt.interpret(local, state)
+            }
+        }
+        else{
+            if(this.elseBlock){
+                const local = new Context(`Block ${state.contextCount++}`, context)
+                for(const stmt of this.elseBlock){
+                    stmt.interpret(local, state)
+                }
+            }
+        }
+    }
+}
+
+class Case extends Stmt{
+    constructor(id, expr, cases, defaultCase, alias){
+        super(id)
+        this.expr = expr
+        this.cases = cases
+        this.defaultCase = defaultCase
+        this.alias = alias
+    }
+
+    _genDOT(){
+        let dot = ''
+        dot += `\t"${this.id}"[label="Case"]\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
+        dot += this.appendParent()
+        return dot
+    }
+
+    interpret(context, state){
+        let returnExpr = this.defaultCase.interpret(context)
+        for(const c of this.cases){
+            if(c[0] instanceof Binary){
+                const result = c[0].interpret(context).valueOf()
+                if(result){
+                    returnExpr = c[1].interpret(context)
+                    break
+                }
+            }
+            else{
+                const result = new Binary(null, this.expr, '=', c[0])
+                    .interpret(context).valueOf()
+                if(result){
+                    returnExpr = c[1].interpret(context)
+                    break
+                }
+            }
+        }
+        if(this.alias){
+            state.messages.push(`${this.alias} -> `+String(returnExpr)+'\n')
+        }
+    }
+}
+
 module.exports = {
     Print,
     Declare,
@@ -516,4 +594,6 @@ module.exports = {
     While,
     Break,
     Continue,
+    If,
+    Case,
 }

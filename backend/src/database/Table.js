@@ -1,4 +1,5 @@
 import Context from "../interpreter/Context.cjs"
+import { Literal } from "../interpreter/Expression.cjs"
 import {NULL} from '../interpreter/Types.cjs'
 
 export default class Table{
@@ -34,7 +35,8 @@ export default class Table{
         }
         for(let i = 0; i < columns_arr.length; i++){
             const expr = values_arr[i].interpret(context)
-            this.columns[columns_arr[i]].values.push(expr)
+            const copy = new Literal(null, expr.type, expr.value).interpret()
+            this.columns[columns_arr[i]].values.push(copy)
         }
         this.cardinality++
     }

@@ -52,6 +52,10 @@ stmt:
     |
     truncate
     |
+    if_stmt
+    |
+    case_stmt
+    |
     block_stmt
     |
     for_stmt
@@ -92,6 +96,37 @@ extended_stmt:
     {$$ = new Stmt.Continue(treeID++)}
     |
     stmt
+;
+
+if_stmt:
+    IF expr THEN extended_stmts else_stmt END IF
+    {$$ = new Stmt.If(treeID++, $2, $4, $5)}
+;
+
+else_stmt:
+    ELSE extended_stmts
+    {$$ = $2}
+    |
+    /* epsilon */
+;
+
+case_stmt:
+    CASE expr cases ELSE expr END asign_alias
+    {$$ = new Stmt.Case(treeID++, $2, $3, $5, $7)}
+;
+
+cases:
+    cases WHEN expr THEN expr
+    {
+        $$ = $1
+        $$.push([$3, $5])
+    }
+    |
+    WHEN expr THEN expr
+    {
+        $$ = []
+        $$.push([$2, $4])
+    }
 ;
 
 for_stmt:

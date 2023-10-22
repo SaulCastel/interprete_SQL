@@ -4,11 +4,15 @@ class TYPE{
     constructor(type){
         this.type = type
     }
+    setVal(){}
 }
 
 class INT extends TYPE{
     constructor(type, value){
         super(type)
+        this.setVal(value)
+    }
+    setVal(value){
         this.value = Math.round(value)
     }
     valueOf(){
@@ -22,6 +26,9 @@ class INT extends TYPE{
 class DOUBLE extends TYPE{
     constructor(type, value){
         super(type)
+        this.setVal(value)
+    }
+    setVal(value){
         this.value = Number(value)
     }
     valueOf(){
@@ -35,6 +42,9 @@ class DOUBLE extends TYPE{
 class DATE extends TYPE{
     constructor(type, value){
         super(type)
+        this.setVal(value)
+    }
+    setVal(value){
         this.value = new Date(String(value)+'CST')
     }
     valueOf(){
@@ -51,12 +61,19 @@ class DATE extends TYPE{
 class STRING extends TYPE{
     constructor(type, value){
         super(type)
+        this.setVal(value)
+    }
+    setVal(value){
         this.value = escapeStr(String(value))
     }
     valueOf(){
         const num = Number(this.value)
         if(isNaN(num)){
-            return this.value
+            let sum = 0
+            for(let i = 0; i < this.value.length; i++){
+                sum += this.value.charCodeAt(i)
+            }
+            return sum
         }
         return num
     }
@@ -68,6 +85,9 @@ class STRING extends TYPE{
 class BOOLEAN extends TYPE{
     constructor(type, value){
         super(type)
+        this.setVal(value)
+    }
+    setVal(value){
         this.value = value.valueOf()
     }
     valueOf(){
@@ -81,6 +101,9 @@ class BOOLEAN extends TYPE{
 class NULL extends TYPE{
     constructor(type){
         super(type)
+        this.setVal()
+    }
+    setVal(){
         this.value = null
     }
     valueOf(){

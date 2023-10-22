@@ -44,7 +44,7 @@ function sum(left, right){
                 case 'DOUBLE':
                     return new Types.DOUBLE('DOUBLE', left + right)
                 case 'STRING':
-                    return new Types.STRING('STRING', (''+left)+(''+right))
+                    return new Types.STRING('STRING', left.toString() + right.toString())
                 case 'DATE':
                     right.setDate(right.value.getDate() + left)
                     return right
