@@ -71,15 +71,7 @@ class STRING extends TYPE{
         this.value = escapeStr(String(value))
     }
     valueOf(){
-        const num = Number(this.value)
-        if(isNaN(num)){
-            let sum = 0
-            for(let i = 0; i < this.value.length; i++){
-                sum += this.value.charCodeAt(i)
-            }
-            return sum
-        }
-        return num
+        return this.value
     }
     toString(){
         return this.value
