@@ -1,0 +1,309 @@
+<querys>:
+    <stmts> EOF
+
+<stmts>:
+    <stmts> <stmt> ';'
+    |
+    <stmt> ';'
+
+<stmt>:
+    <create_table>
+    |
+    <alter_table>
+    |
+    <drop_table>
+    |
+    PRINT <expr>
+    |
+    <select_from>
+    |
+    <select_print>
+    |
+    <insert_into>
+    |
+    <update>
+    |
+    <delete_from>
+    |
+    <truncate>
+    |
+    <if_stmt>
+    |
+    <case_stmt>
+    |
+    <block_stmt>
+    |
+    <for_stmt>
+    |
+    <while_stmt>
+
+<block_stmt>:
+    BEGIN <extended_stmts> END
+
+<extended_stmts>:
+    <extended_stmts> <extended_stmt> ';'
+    |
+    <extended_stmt> ';'
+
+<extended_stmt>:
+    <var_declaration>
+    |
+    <var_default>
+    |
+    <var_assignment>
+    |
+    BREAK
+    |
+    CONTINUE
+    |
+    <stmt>
+
+<if_stmt>:
+    IF <expr> THEN <extended_stmts> <else_stmt> END IF
+
+<else_stmt>:
+    ELSE <extended_stmts>
+    |
+    /* <epsilon> */
+
+<case_stmt>:
+    CASE <expr> <cases> ELSE <expr> END <asign_alias>
+
+<cases>:
+    <cases> WHEN <expr> THEN <expr>
+    |
+    WHEN <expr> THEN <expr>
+
+<for_stmt>:
+    FOR <identifier> IN INT_LITERAL '..' INT_LITERAL <block_stmt>
+
+<while_stmt>:
+    WHILE <expr> <block_stmt>
+
+<var_declaration>:
+    DECLARE <var_list>
+
+<var_list>:
+    <var_list> ',' '@' <identifier> <type>
+    |
+    '@' <identifier> <type>
+
+<var_default>:
+    DECLARE '@' <identifier> <type> DEFAULT <expr>
+
+<var_assignment>:
+    SET '@' <identifier> '=' <expr>
+
+<create_table>:
+    CREATE TABLE <identifier> '(' <col_declaration> ')'
+
+<col_declaration>:
+    <col_declaration> ',' <identifier> <type>
+    |
+    <identifier> <type>
+
+<alter_table>:
+    ALTER TABLE <identifier> <alter_action>
+
+<alter_action>:
+    ADD <identifier> <type>
+    |
+    DROP COLUMN <identifier>
+    |
+    RENAME TO <identifier>
+    |
+    RENAME COLUMN <identifier> TO <identifier>
+
+<drop_table>:
+    DROP TABLE <identifier>
+
+<insert_into>:
+    INSERT INTO <identifier> '(' <column_list> ')'
+    VALUES '(' <value_list> ')'
+
+<column_list>:
+    <column_list> ',' <identifier>
+    |
+    <identifier>
+
+<value_list>:
+    <value_list> ',' <expr>
+    |
+    <expr>
+
+<select_print>:
+    SELECT <selection>
+
+<select_from>:
+    SELECT '*' FROM <identifier> <where>
+    |
+    SELECT <selection> FROM <identifier> <where>
+
+<selection>:
+    <selection> ',' <expr> <asign_alias>
+    |
+    <expr> <asign_alias>
+
+<asign_alias>:
+    AS <identifier>
+    |
+    AS <string_literal>
+    |
+    /* <epsilon> */
+
+<where>:
+    WHERE <conditions>
+    |
+    /* <epsilon> */
+
+<conditions>:
+    <conditions> AND <condition>
+    |
+    <conditions> OR <condition>
+    |
+    <condition>
+
+<condition>:
+    <column_name> '=' <cond_expr>
+    |
+    <column_name> '!=' <cond_expr>
+    |
+    <column_name> '<' <cond_expr>
+    |
+    <column_name> '<=' <cond_expr>
+    |
+    <column_name> '>' <cond_expr>
+    |
+    <column_name> '>=' <cond_expr>
+
+<column_name>:
+    <identifier>
+
+<cond_expr>:
+    <cond_expr> '+' <cond_expr>
+    |
+    <cond_expr> '-' <cond_expr>
+    |
+    <cond_expr> '*' <cond_expr>
+    |
+    <cond_expr> '/' <cond_expr>
+    |
+    <cond_expr> '%' <cond_expr>
+    |
+    '-' <cond_expr>
+    |
+    '(' <cond_expr> ')'
+    |
+    '@' <identifier>
+    |
+    <literal>
+
+<native_func>:
+    CAST '(' <expr> AS <type> ')'
+    |
+    LOWER '(' <expr> ')'
+    |
+    UPPER '(' <expr> ')'
+    |
+    ROUND '(' <expr> <option> ')'
+    |
+    LEN '(' <expr> ')'
+    |
+    TRUNCATE '(' <expr> <option> ')'
+    |
+    TYPEOF '(' <expr> ')'
+
+<option>:
+    ',' <expr>
+    |
+    /* <epsilon> */
+
+<update>:
+    UPDATE <identifier> SET <update_list> <where>
+
+<update_list>:
+    <update_list> ',' <identifier> '=' <expr>
+    |
+    <identifier> '=' <expr>
+
+<truncate>:
+    TRUNCATE TABLE <identifier>
+
+<delete_from>:
+    DELETE FROM <identifier> <where>
+
+<expr>:
+    <expr> '+' <expr>
+    |
+    <expr> '-' <expr>
+    |
+    <expr> '*' <expr>
+    |
+    <expr> '/' <expr>
+    |
+    <expr> '%' <expr>
+    |
+    <expr> '=' <expr>
+    |
+    <expr> '!=' <expr>
+    |
+    <expr> '<' <expr>
+    |
+    <expr> '<=' <expr>
+    |
+    <expr> '>' <expr>
+    |
+    <expr> '>=' <expr>
+    |
+    <expr> AND <expr>
+    |
+    <expr> OR <expr>
+    |
+    '-' <expr>
+    |
+    NOT <expr>
+    |
+    '(' <expr> ')'
+    |
+    '@' <identifier>
+    |
+    <identifier>
+    |
+    <native_func>
+    |
+    <literal>
+
+<literal>:
+    INT_LITERAL
+    |
+    DOUBLE_LITERAL
+    |
+    DATE_LITERAL
+    |
+    <string_literal>
+    |
+    TRUE
+    |
+    FALSE
+    |
+    NULL
+
+<type>:
+    INT
+    |
+    DOUBLE
+    |
+    DATE
+    |
+    VARCHAR
+    |
+    BOOLEAN
+    |
+    NULL
+
+<identifier>:
+    ID
+
+<string_literal>:
+    STRING_LITERAL
+
