@@ -11,6 +11,7 @@
 querys:
     stmts EOF
     {
+        treeID = 0
         $$ = $1
         return $$
     }

@@ -85,6 +85,7 @@ var $0 = $$.length - 1;
 switch (yystate) {
 case 1:
 
+        treeID = 0
         this.$ = $$[$0-1]
         return this.$
     

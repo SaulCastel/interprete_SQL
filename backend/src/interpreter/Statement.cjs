@@ -16,16 +16,17 @@ class Stmt{
     appendList(stmts, suffix){
         let dot = ''
         dot += stmts[0]._genDOT()
-        dot += `\t"${this.id}${suffix}0"[label="BlockStatements"]\n`
+        dot += `\t"${this.id}${suffix}0"[label="BlockStmts0"]\n`
         dot += `\t"${this.id}${suffix}0" -- "stmt${stmts[0].id}"\n`
-        for(let i = 1; i < stmts.length; i++){
+        for(let i = 1; i < stmts.length-1; i++){
             dot += stmts[i]._genDOT()
             dot += `\t"${this.id}${suffix}${i-1}" -- "stmt${stmts[i].id}"\n`
-            dot += `\t"${this.id}${suffix}${i}"[label="BlockStatements"]\n`
+            dot += `\t"${this.id}${suffix}${i}"[label="BlockStmts${i}"]\n`
             dot += `\t"${this.id}${suffix}${i}" -- "${this.id}${suffix}${i-1}"\n`
         }
         const length = stmts.length-1
-        dot += `\t"${this.id}${suffix}${length}" -- "${stmts[length].id}"\n`
+        dot += stmts[length]._genDOT()
+        dot += `\t"${this.id}${suffix}${length-1}" -- "stmt${stmts[length].id}"\n`
         return dot
     }
 }
@@ -418,7 +419,7 @@ class Block extends Stmt{
         dot += `\t"${this.id}end"[label="END"]\n`
         dot += this.appendList(this.stmts, 'code')
         dot += `\t"stmt${this.id}" -- "${this.id}begin"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}code${this.stmts.length-1}"\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}code${this.stmts.length-2}"\n`
         dot += `\t"stmt${this.id}" -- "${this.id}end"\n`
         dot += this.appendParent()
         return dot
