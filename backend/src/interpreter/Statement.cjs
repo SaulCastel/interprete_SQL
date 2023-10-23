@@ -13,6 +13,21 @@ class Stmt{
         dot += `\t"${this.id};"[label=";"]\n`
         return dot
     }
+    appendList(stmts, suffix){
+        let dot = ''
+        dot += stmts[0]._genDOT()
+        dot += `\t"${this.id}${suffix}0"[label="BlockStatements"]\n`
+        dot += `\t"${this.id}${suffix}0" -- "stmt${stmts[0].id}"\n`
+        for(let i = 1; i < stmts.length; i++){
+            dot += stmts[i]._genDOT()
+            dot += `\t"${this.id}${suffix}${i-1}" -- "stmt${stmts[i].id}"\n`
+            dot += `\t"${this.id}${suffix}${i}"[label="BlockStatements"]\n`
+            dot += `\t"${this.id}${suffix}${i}" -- "${this.id}${suffix}${i-1}"\n`
+        }
+        const length = stmts.length-1
+        dot += `\t"${this.id}${suffix}${length}" -- "${stmts[length].id}"\n`
+        return dot
+    }
 }
 
 class Print extends Stmt{
@@ -72,7 +87,7 @@ class DeclareDefault extends Stmt{
         let dot = ''
         dot += this.expr._genDOT()
         dot += `\t"${this.id}"[label="DECLARE"]\n`
-        dot += `\t"${this.id}i"[label="${this.key}"]\n`
+        dot += `\t"${this.id}i"[label="@${this.key}"]\n`
         dot += `\t"${this.id}t"[label="${this.type}"]\n`
         dot += `\t"${this.id}default"[label="DEFAULT"]\n`
         dot += `\t"stmt${this.id}" -- "${this.id}"\n`
@@ -129,7 +144,7 @@ class CreateTable extends Stmt{
         dot += `\t"${this.id}"[label="CREATE"]\n`
         dot += `\t"${this.id}table"[label="TABLE"]\n`
         dot += `\t"${this.id}i"[label="${this.tableID}"]\n`
-        dot += `\t"${this.id}cols"[label="Columns"]\n`
+        dot += `\t"${this.id}cols"[label="Column(s)"]\n`
         dot += `\t"stmt${this.id}" -- "${this.id}"\n`
         dot += `\t"stmt${this.id}" -- "${this.id}table"\n`
         dot += `\t"stmt${this.id}" -- "${this.id}i"\n`
@@ -155,7 +170,7 @@ class AlterTable extends Stmt{
         dot += `\t"${this.id}"[label="ALTER"]\n`
         dot += `\t"${this.id}table"[label="TABLE"]\n`
         dot += `\t"${this.id}i"[label="${this.tableID}"]\n`
-        dot += `\t"${this.id}action"[label="${this.action}"]\n`
+        dot += `\t"${this.id}action"[label="${this.action[0]}"]\n`
         dot += `\t"stmt${this.id}" -- "${this.id}"\n`
         dot += `\t"stmt${this.id}" -- "${this.id}table"\n`
         dot += `\t"stmt${this.id}" -- "${this.id}i"\n`
@@ -205,8 +220,8 @@ class InsertInto extends Stmt{
         dot += `\t"${this.id}"[label="INSERT"]\n`
         dot += `\t"${this.id}into"[label="INTO"]\n`
         dot += `\t"${this.id}i"[label="${this.tableID}"]\n`
-        dot += `\t"${this.id}cols"[label="Columns"]\n`
-        dot += `\t"${this.id}vals"[label="Values"]\n`
+        dot += `\t"${this.id}cols"[label="Column(s)"]\n`
+        dot += `\t"${this.id}vals"[label="Value(s)"]\n`
         dot += `\t"stmt${this.id}" -- "${this.id}"\n`
         dot += `\t"stmt${this.id}" -- "${this.id}into"\n`
         dot += `\t"stmt${this.id}" -- "${this.id}i"\n`
@@ -275,7 +290,7 @@ class Select extends Stmt{
     _genDOT(){
         let dot = ''
         dot += `\t"${this.id}"[label="SELECT"]\n`
-        dot += `\t"${this.id}expr"[label="Expressions"]\n`
+        dot += `\t"${this.id}expr"[label="Expression(s)"]\n`
         dot += `\t"stmt${this.id}" -- "${this.id}"\n`
         dot += `\t"stmt${this.id}" -- "${this.id}expr"\n`
         dot += this.appendParent()
@@ -373,7 +388,7 @@ class DeleteFrom extends Stmt{
     _genDOT(){
         let dot = ''
         dot += this.condition._genDOT()
-        dot += `\t"${this.id}"[label="UPDATE"]\n`
+        dot += `\t"${this.id}"[label="DELETE"]\n`
         dot += `\t"${this.id}from"[label="FROM"]\n`
         dot += `\t"${this.id}i"[label="${this.tableID}"]\n`
         dot += `\t"${this.id}where"[label="WHERE"]\n`
@@ -397,7 +412,17 @@ class Block extends Stmt{
         this.stmts = stmts
     }
 
-    _genDOT(){}
+    _genDOT(){
+        let dot = ''
+        dot += `\t"${this.id}begin"[label="BEGIN"]\n`
+        dot += `\t"${this.id}end"[label="END"]\n`
+        dot += this.appendList(this.stmts, 'code')
+        dot += `\t"stmt${this.id}" -- "${this.id}begin"\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}code${this.stmts.length-1}"\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}end"\n`
+        dot += this.appendParent()
+        return dot
+    }
 
     interpret(context, state, createContext=true){
         if(createContext){
@@ -417,7 +442,13 @@ class Break extends Stmt{
         super(id)
     }
 
-    _genDOT(){}
+    _genDOT(){
+        let dot = ''
+        dot += `\t"${this.id}"[label="BREAK"]\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
+        dot += this.appendParent()
+        return dot
+    }
 
     interpret(context, state){
         state.flag = 'BREAK'
@@ -429,7 +460,13 @@ class Continue extends Stmt{
         super(id)
     }
 
-    _genDOT(){}
+    _genDOT(){
+        let dot = ''
+        dot += `\t"${this.id}"[label="CONTINUE"]\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
+        dot += this.appendParent()
+        return dot
+    }
 
     interpret(context, state){
         state.flag = 'CONTINUE'
@@ -445,7 +482,25 @@ class For extends Stmt{
         this.block = block
     }
 
-    _genDOT(){}
+    _genDOT(){
+        let dot = ''
+        dot += this.block._genDOT()
+        dot += `\t"${this.id}"[label="FOR"]\n`
+        dot += `\t"${this.id}i"[label="${this.iterator.toString()}"]\n`
+        dot += `\t"${this.id}in"[label="IN"]\n`
+        dot += `\t"${this.id}lower"[label="${this.lowerLimit}"]\n`
+        dot += `\t"${this.id}.."[label=".."]\n`
+        dot += `\t"${this.id}upper"[label="${this.upperLimit}"]\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}i"\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}in"\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}lower"\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}.."\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}upper"\n`
+        dot += `\t"stmt${this.id}" -- "stmt${this.block.id}"\n`
+        dot += this.appendParent()
+        return dot
+    }
 
     interpret(context, state){
         const local = new Context(`Block ${state.contextCount++}`, context)
@@ -475,7 +530,17 @@ class While extends Stmt{
         this.block = block
     }
 
-    _genDOT(){}
+    _genDOT(){
+        let dot = ''
+        dot += this.condition._genDOT()
+        dot += this.block._genDOT()
+        dot += `\t"${this.id}"[label="WHILE"]\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
+        dot += `\t"stmt${this.id}" -- "${this.condition.id}"\n`
+        dot += `\t"stmt${this.id}" -- "stmt${this.block.id}"\n`
+        dot += this.appendParent()
+        return dot
+    }
 
     interpret(context, state){
         const local = new Context(`Block ${state.contextCount++}`, context)
@@ -508,8 +573,22 @@ class If extends Stmt{
 
     _genDOT(){
         let dot = ''
+        dot += this.condition._genDOT()
+        dot += this.appendList(this.stmts, 'code')
         dot += `\t"${this.id}"[label="IF"]\n`
+        dot += `\t"${this.id}then"[label="THEN"]\n`
+        dot += `\t"${this.id}end"[label="END IF"]\n`
         dot += `\t"stmt${this.id}" -- "${this.id}"\n`
+        dot += `\t"stmt${this.id}" -- "${this.condition.id}"\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}then"\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}code${this.stmts.length-1}"\n`
+        if(this.elseBlock){
+            dot += this.appendList(this.elseBlock, 'else')
+            dot += `\t"${this.id}elseBlock"[label="ELSE"]\n`
+            dot += `\t"stmt${this.id}" -- "${this.id}elseBlock"\n`
+            dot += `\t"stmt${this.id}" -- "${this.id}else${this.elseBlock.length-1}"\n`
+        }
+        dot += `\t"stmt${this.id}" -- "${this.id}end"\n`
         dot += this.appendParent()
         return dot
     }
@@ -544,8 +623,20 @@ class Case extends Stmt{
 
     _genDOT(){
         let dot = ''
-        dot += `\t"${this.id}"[label="Case"]\n`
+        dot += this.expr._genDOT()
+        dot += `\t"${this.id}"[label="CASE"]\n`
+        dot += `\t"${this.id}cases"[label="Case(s)"]\n`
+        dot += `\t"${this.id}default"[label="DefaultCase"]\n`
+        dot += `\t"${this.id}end"[label="END"]\n`
         dot += `\t"stmt${this.id}" -- "${this.id}"\n`
+        dot += `\t"stmt${this.id}" -- "${this.expr.id}"\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}cases"\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}default"\n`
+        dot += `\t"stmt${this.id}" -- "${this.id}end"\n`
+        if(this.alias){
+            dot += `\t"${this.id}alias"[label="${this.alias}"]\n`
+            dot += `\t"stmt${this.id}" -- "${this.id}alias"\n`
+        }
         dot += this.appendParent()
         return dot
     }

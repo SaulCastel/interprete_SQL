@@ -180,8 +180,8 @@ class Variable extends Expr{
         dot += `\t"${this.id}"[label="Variable"]\n`
         dot += `\t"${this.id}@"[label="${this.name}"]\n`
         dot += `\t"${this.id}v"[label="${this.name}"]\n`
-        dot += `\t"${this.id}" -- ${this.id}@\n`
-        dot += `\t"${this.id}" -- ${this.id}v\n`
+        dot += `\t"${this.id}" -- "${this.id}@"\n`
+        dot += `\t"${this.id}" -- "${this.id}v"\n`
         return dot
     }
 
@@ -204,7 +204,7 @@ class Identifier extends Expr{
         let dot = ''
         dot += `\t"${this.id}"[label="Identifier"]\n`
         dot += `\t"${this.id}v"[label="${this.name}"]\n`
-        dot += `\t"${this.id}" -- ${this.id}v\n`
+        dot += `\t"${this.id}" -- "${this.id}v"\n`
         return dot
     }
 
