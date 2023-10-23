@@ -9,7 +9,7 @@ export default {
         return {
             input: '',
             output: '',
-            tables: undefined
+            tables: undefined,
         }
     },
     methods: {
@@ -39,7 +39,16 @@ export default {
         },
         updateOutput(str) {
             str = (str === '') ? "\n" : str;
-            this.output += '> ' + str
+            this.output += '[saulc@localhost proy2]\n' + str
+        },
+        readFile() {
+            const file = this.$refs.file.files[0]
+            const fileReader = new FileReader()
+            fileReader.onload = (res) => {
+                this.input = res.target.result
+            }
+            fileReader.onerror = (err) => console.error(err)
+            fileReader.readAsText(file)
         }
     }
 }
@@ -49,7 +58,9 @@ export default {
     <nav class="navbar">
         <a href="#" class="logo">QueryCripter</a>
         <ul class="nav-links">
-            <li class="nav-item"><a href="#">Archivo</a></li>
+            <li class="nav-item">
+                <input type="file" ref="file" @change="readFile">
+            </li>
             <li class="nav-item"><a href="#" @click="interpret">Ejecutar</a></li>
             <li class="nav-item"><a href="#">Reportes</a></li>
         </ul>
