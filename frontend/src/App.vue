@@ -1,8 +1,5 @@
 <script>
 export default {
-    components: {
-        Table
-    },
     data() {
         return {
             input: '',
