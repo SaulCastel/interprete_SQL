@@ -1,5 +1,6 @@
 const Context = require('./Context.cjs')
 const Binary = require('./Expression.cjs').Binary
+const markdownTable = require('../util/markdownTable/markdownTable.cjs')
 
 class Stmt{
     constructor(id){
@@ -278,7 +279,7 @@ class SelectFrom extends Stmt{
             context
         )
         state.messages.push(`${result.records.length} registro(s) seleccionado(s)\n`)
-        state.queries.push(result)
+        state.messages.push(`\n${markdownTable([result.header, ...result.records])}\n\n`)
     }
 }
 
@@ -316,7 +317,7 @@ class Select extends Stmt{
             }
         }
         result.records.push(record)
-        state.queries.push(result)
+        state.messages.push(`\n${markdownTable([result.header, ...result.records])}\n\n`)
     }
 }
 

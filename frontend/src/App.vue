@@ -1,6 +1,4 @@
 <script>
-import Table from './components/Table.vue'
-
 export default {
     components: {
         Table
@@ -9,7 +7,6 @@ export default {
         return {
             input: '',
             output: '',
-            tables: undefined,
         }
     },
     methods: {
@@ -29,7 +26,6 @@ export default {
                     output += msg
                 }
                 this.updateOutput(output)
-                this.tables = result.queries
             } catch (error) {
                 console.error("Error:", error)
             }
@@ -66,13 +62,9 @@ export default {
         </ul>
     </nav>
     <div id="two-col-cont">
-        <textarea class="col pan" :value="input" @input="getText"></textarea>
+        <textarea class="col pan" :value="input" @input="getText" wrap="off"></textarea>
         <div class="col" id="output">
             <pre class="pan">{{ output }}</pre>
-            <div class="pan" id="table-view">
-                <Table v-if="tables" v-for="table in tables" :header="table.header" :records="table.records"></Table>
-                <p v-else>No se ha realizado ninguna consulta</p>
-            </div>
         </div>
     </div>
 </template>

@@ -10,7 +10,6 @@ export const interpret = (req, res) => {
     let state = {
         messages: [],
         database: new Database(),
-        queries: [],
         contextCount: 0,
         flag: null
     }
@@ -20,7 +19,6 @@ export const interpret = (req, res) => {
     genDOT(stmts)
     const output = {
         messages: state.messages,
-        queries: state.queries,
     }
     res.status(200).json(output)
 }

@@ -37,7 +37,7 @@ textarea {
 }
 
 #output > * {
-    height: 50%;
+    height: 100%;
 }
 
 #table-view {
@@ -47,7 +47,6 @@ textarea {
 }
 
 pre {
-    text-wrap: wrap;
     overflow: auto;
 }
 

@@ -250,6 +250,10 @@ class Lower extends Expr{
         this.expr = expr
     }
 
+    toString(){
+        return `lower ${this.expr.toString()}`
+    }
+
     _genDOT(){
         let dot = ''
         return dot
@@ -266,6 +270,10 @@ class Upper extends Expr{
     constructor(id, expr){
         super(id)
         this.expr = expr
+    }
+
+    toString(){
+        return `upper ${this.expr.toString()}`
     }
 
     _genDOT(){
@@ -285,6 +293,10 @@ class Round extends Expr{
         super(id)
         this.expr = expr
         this.decimals = decimals
+    }
+
+    toString(){
+        return `round ${this.expr.toString()}`
     }
 
     _genDOT(){
@@ -313,6 +325,10 @@ class Len extends Expr{
         this.expr = expr
     }
 
+    toString(){
+        return `len ${this.expr.toString()}`
+    }
+
     _genDOT(){
         let dot = ''
         return dot
@@ -329,6 +345,10 @@ class Truncate extends Expr{
         super(id)
         this.expr = expr
         this.decimals = decimals
+    }
+
+    toString(){
+        return `truncate ${this.expr.toString()}`
     }
 
     _genDOT(){
@@ -355,6 +375,10 @@ class TypeOf extends Expr{
     constructor(id, expr){
         super(id)
         this.expr = expr
+    }
+
+    toString(){
+        return `typeOf ${this.expr.toString()}`
     }
 
     _genDOT(){
