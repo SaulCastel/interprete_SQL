@@ -3,17 +3,33 @@ const Binary = require('./Expression.cjs').Binary
 const markdownTable = require('../util/markdownTable/markdownTable.cjs')
 
 class Stmt{
-    constructor(id){
+    constructor(id, tokens, callables=[], root='Statement'){
         this.id = id
+        this.tokens = tokens
+        this.tokens.push(';')
+        this.callabes = callables
+        this.root = root
     }
+
     interpret(){}
-    _genDOT(){}
-    appendParent(){
-        let dot = `\t"stmt${this.id}" -- "${this.id};"\n`
-        dot += `\t"stmt${this.id}"[label="Statement"]\n`
-        dot += `\t"${this.id};"[label=";"]\n`
+
+    _genDOT(){
+        let dot = `\t"${this.id}"[label="${this.root}"]\n`
+        for(const token in this.tokens){
+            if(token[0] === '$'){
+                const child = this.callabes[Number(tokens[1])]
+                dot += child._genDOT()
+                dot += `\t"${this.id}" -- "${child.id}"\n`
+            }
+            else{
+                const node = this.id + token
+                dot += `\t"${node}"[label="${token}"]\n`
+                dot += `\t"${this.id}" -- "${node}"\n`
+            }
+        }
         return dot
     }
+
     appendList(stmts, suffix){
         let dot = ''
         dot += stmts[0]._genDOT()
@@ -34,18 +50,12 @@ class Stmt{
 
 class Print extends Stmt{
     constructor(id, expr){
-        super(id)
+        super(
+            id,
+            ['PRINT', '$0'],
+            [expr]
+        )
         this.expr = expr
-    }
-
-    _genDOT(){
-        let dot = ''
-        dot += this.expr._genDOT()
-        dot += `\t"${this.id}"[label="PRINT"]\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
-        dot += `\t"stmt${this.id}" -- "${this.expr.id}"\n`
-        dot += this.appendParent()
-        return dot
     }
 
     interpret(context, state){
@@ -56,18 +66,14 @@ class Print extends Stmt{
 
 class Declare extends Stmt{
     constructor(id, symbols){
-        super(id)
+        super(
+            id,
+            [
+                'DECLARE',
+                ...symbols.map(symbol => `@${symbol[0]} ${symbol[1]}`)
+            ]
+        )
         this.symbols = symbols
-    }
-
-    _genDOT(){
-        let dot = ''
-        dot += `\t"${this.id}"[label="DECLARE"]\n`
-        dot += `\t"${this.id}list"[label="Variable(s)"]\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}list"\n`
-        dot += this.appendParent()
-        return dot
     }
 
     interpret(context, state){
@@ -79,26 +85,14 @@ class Declare extends Stmt{
 
 class DeclareDefault extends Stmt{
     constructor(id, key, type, expr){
-        super(id)
+        super(
+            id,
+            ['DECLARE', `@${key}`, type, 'DEFAULT', '$0'],
+            [expr]
+        )
         this.key = key
         this.type = type
         this.expr = expr
-    }
-
-    _genDOT(){
-        let dot = ''
-        dot += this.expr._genDOT()
-        dot += `\t"${this.id}"[label="DECLARE"]\n`
-        dot += `\t"${this.id}i"[label="@${this.key}"]\n`
-        dot += `\t"${this.id}t"[label="${this.type}"]\n`
-        dot += `\t"${this.id}default"[label="DEFAULT"]\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}i"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}t"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}default"\n`
-        dot += `\t"stmt${this.id}" -- "${this.expr.id}"\n`
-        dot += this.appendParent()
-        return dot
     }
 
     interpret(context, state){
@@ -109,23 +103,13 @@ class DeclareDefault extends Stmt{
 
 class Set extends Stmt{
     constructor(id, key, expr){
-        super(id)
+        super(
+            id,
+            ['SET', `@${key}`, '=', '$0'],
+            [expr]
+        )
         this.key = key
         this.expr = expr
-    }
-
-    _genDOT(){
-        let dot = ''
-        dot += this.expr._genDOT()
-        dot += `\t"${this.id}"[label="SET"]\n`
-        dot += `\t"${this.id}i"[label="@${this.key}"]\n`
-        dot += `\t"${this.id}="[label="="]\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}i"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}="\n`
-        dot += `\t"stmt${this.id}" -- "${this.expr.id}"\n`
-        dot += this.appendParent()
-        return dot
     }
 
     interpret(context, state){
@@ -136,23 +120,19 @@ class Set extends Stmt{
 
 class CreateTable extends Stmt{
     constructor(id, tableID, columns){
-        super(id)
+        super(
+            id,
+            [
+                'CREATE',
+                'TABLE',
+                tableID,
+                '(',
+                ...columns.map(col => `${col[0]} ${col[1]}`),
+                ')'
+            ]
+        )
         this.tableID = tableID
         this.columns = columns
-    }
-
-    _genDOT(){
-        let dot = ''
-        dot += `\t"${this.id}"[label="CREATE"]\n`
-        dot += `\t"${this.id}table"[label="TABLE"]\n`
-        dot += `\t"${this.id}i"[label="${this.tableID}"]\n`
-        dot += `\t"${this.id}cols"[label="Column(s)"]\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}table"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}i"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}cols"\n`
-        dot += this.appendParent()
-        return dot
     }
 
     interpret(context, state){
@@ -162,23 +142,12 @@ class CreateTable extends Stmt{
 
 class AlterTable extends Stmt{
     constructor(id, tableID, action){
-        super(id)
+        super(
+            id,
+            ['ALTER', 'TABLE', action[0]]
+        )
         this.tableID = tableID
         this.action = action
-    }
-
-    _genDOT(){
-        let dot = ''
-        dot += `\t"${this.id}"[label="ALTER"]\n`
-        dot += `\t"${this.id}table"[label="TABLE"]\n`
-        dot += `\t"${this.id}i"[label="${this.tableID}"]\n`
-        dot += `\t"${this.id}action"[label="${this.action[0]}"]\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}table"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}i"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}action"\n`
-        dot += this.appendParent()
-        return dot
     }
 
     interpret(context, state){
@@ -188,20 +157,11 @@ class AlterTable extends Stmt{
 
 class DropTable extends Stmt{
     constructor(id, tableID){
-        super(id)
+        super(
+            id,
+            ['DROP', 'TABLE', tableID]
+        )
         this.tableID = tableID
-    }
-
-    _genDOT(){
-        let dot = ''
-        dot += `\t"${this.id}"[label="DROP"]\n`
-        dot += `\t"${this.id}table"[label="TABLE"]\n`
-        dot += `\t"${this.id}i"[label="${this.tableID}"]\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}table"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}i"\n`
-        dot += this.appendParent()
-        return dot
     }
 
     interpret(context, state){
@@ -211,26 +171,24 @@ class DropTable extends Stmt{
 
 class InsertInto extends Stmt{
     constructor(id, tableID, columns, values){
-        super(id)
+        super(
+            id,
+            [
+                'INSERT',
+                'INTO',
+                tableID,
+                '(',
+                ...columns,
+                ')',
+                'VALUES',
+                '(',
+                ...values.map(val => val.toString()),
+                ')'
+            ]
+        )
         this.tableID = tableID
         this.columns = columns
         this.values = values
-    }
-
-    _genDOT(){
-        let dot = ''
-        dot += `\t"${this.id}"[label="INSERT"]\n`
-        dot += `\t"${this.id}into"[label="INTO"]\n`
-        dot += `\t"${this.id}i"[label="${this.tableID}"]\n`
-        dot += `\t"${this.id}cols"[label="Column(s)"]\n`
-        dot += `\t"${this.id}vals"[label="Value(s)"]\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}into"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}i"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}cols"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}vals"\n`
-        dot += this.appendParent()
-        return dot
     }
 
     interpret(context, state){
@@ -240,35 +198,23 @@ class InsertInto extends Stmt{
 
 class SelectFrom extends Stmt{
     constructor(id, tableID, selection, condition){
-        super(id)
+        super(
+            id,
+            [
+                'SELECT',
+                ...selection.map(expr => expr.toString()),
+                'FROM',
+                tableID,
+            ]
+        )
+        if(condition){
+            this.tokens.push('WHERE')
+            this.tokens.push('$0')
+            this.callabes.push(condition)
+        }
         this.tableID = tableID
         this.selection = selection
         this.condition = condition
-    }
-
-    _genDOT(){
-        let dot = ''
-        dot += `\t"${this.id}"[label="SELECT"]\n`
-        if(this.selection === '*'){
-            dot += `\t"${this.id}selection"[label="*"]\n`
-        }
-        else{
-            dot += `\t"${this.id}selection"[label="Selection"]\n`
-        }
-        dot += `\t"${this.id}from"[label="FROM"]\n`
-        dot += `\t"${this.id}i"[label="${this.tableID}"]\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}selection"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}from"\n`
-        dot += `\t"stmt${this.id}" -- "${this.id}i"\n`
-        if(this.condition){
-            dot += this.condition._genDOT()
-            dot += `"${this.id}where"[label="WHERE"];`
-            dot += `\t"stmt${this.id}" -- "${this.id}where"\n`
-            dot += `\t"stmt${this.id}" -- "${this.condition.id}"\n`
-        }
-        dot += this.appendParent()
-        return dot
     }
 
     interpret(context, state){
