@@ -110,11 +110,57 @@ class NULL extends TYPE{
     }
 }
 
+class PROC extends TYPE{
+    constructor(type, value){
+        super(type)
+        this.setVal(value)
+    }
+
+    valueOf(){
+        return this.value
+    }
+
+    setVal(value){
+        this.value = value
+    }
+}
+
+class FUNC extends TYPE{
+    constructor(type, value){
+        super(type)
+        this.setVal(value)
+    }
+
+    valueOf(){
+        return this.value
+    }
+
+    setVal(value){
+        this.value = value
+    }
+}
+
+class CONTINUE extends TYPE{
+    constructor(type){
+        super(type)
+    }
+}
+
+class BREAK extends TYPE{
+    constructor(type){
+        super(type)
+    }
+}
+
 module.exports = {
     INT,
     DOUBLE,
     STRING,
     DATE,
     BOOLEAN,
-    NULL
+    NULL,
+    PROC,
+    FUNC,
+    CONTINUE,
+    BREAK,
 }

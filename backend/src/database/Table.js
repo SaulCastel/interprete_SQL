@@ -1,5 +1,5 @@
 import Context from "../interpreter/Context.cjs"
-import { Literal } from "../interpreter/Expression.cjs"
+import Literal from "../interpreter/Literal.cjs"
 import {NULL} from '../interpreter/Types.cjs'
 
 export default class Table{

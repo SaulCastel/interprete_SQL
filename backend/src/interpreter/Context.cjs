@@ -1,4 +1,4 @@
-const Literal = require('./Expression.cjs').Literal
+const Literal = require('./Literal.cjs')
 
 class Context{
     constructor(name, prev = null){

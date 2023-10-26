@@ -1,5 +1,7 @@
 const Types = require('./Types.cjs')
 const Operations = require('./Operations.cjs')
+const Context = require('./Context.cjs')
+const Literal = require('./Literal.cjs')
 
 class Expr{
     constructor(id){
@@ -123,45 +125,6 @@ class Group extends Expr{
 
     interpret(context = null){
         return this.expr.interpret(context)
-    }
-}
-
-class Literal extends Expr{
-    constructor(id, type, value){
-        super(id)
-        this.type = type
-        this.value = value
-    }
-
-    toString(){
-        return this.value.toString()
-    }
-
-    _genDOT(){
-        let dot = `\t"${this.id}"[label="${this.type}"]\n`
-        dot += `\t"${this.id}v"[label="${this.value}"]\n`
-        dot += `\t"${this.id}" -- "${this.id}v"\n`
-        return dot
-    }
-
-    interpret(context = null){
-        switch(this.type){
-            case 'INT':
-                return new Types.INT(this.type, this.value)
-            case 'DOUBLE':
-                return new Types.DOUBLE(this.type, this.value)
-            case 'STRING':
-                return new Types.STRING(this.type, this.value)
-            case 'DATE':
-                return new Types.DATE(this.type, this.value)
-            case 'BOOLEAN':
-                if(typeof this.value === 'string'){
-                    this.value = this.value.toLowerCase() === 'true'
-                }
-                return new Types.BOOLEAN(this.type, this.value)
-            case 'NULL':
-                return new Types.NULL(this.type)
-        }
     }
 }
 
@@ -392,11 +355,38 @@ class TypeOf extends Expr{
     }
 }
 
+class FunctionCall extends Expr{
+    constructor(id, name, args){
+        super(id)
+        this.name = name
+        this.arguments = args
+    }
+
+    toString(){
+        let signature = this.arguments[0].toString()
+        for(let i = 1; i<this.arguments.length;i++){
+            signature += ', '+this.arguments[i].toString()
+        }
+        return `${this.name}(${signature})`
+    }
+
+    interpret(context){
+        const func = context.get(this.name).valueOf()
+        const local = new Context(`FUNC ${this.name}`, null)
+        for(let i = 0; i < this.arguments.length; i++){
+            const value = this.arguments[i].interpret(context)
+            local.set(func.parameters[i][0], func.parameters[i][1], value)
+        }
+        local.prev = context
+        const returnExpr = func.block.interpret(local, null, false)
+        return new Literal(null, func.returnType, returnExpr.valueOf())
+    }
+}
+
 module.exports = {
     Binary,
     Unary,
     Group,
-    Literal,
     Variable,
     Identifier,
     Cast,
@@ -406,4 +396,5 @@ module.exports = {
     Len,
     Truncate,
     TypeOf,
+    FunctionCall,
 }

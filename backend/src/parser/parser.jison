@@ -62,6 +62,53 @@ stmt:
     for_stmt
     |
     while_stmt
+    |
+    create_proc
+    |
+    call_proc
+    |
+    create_func
+;
+
+create_func:
+    CREATE FUNCTION identifier '(' parameters ')'
+    RETURNS type block_stmt
+    {$$ = new Stmt.CreateFunc(treeID++, $3, $5, $8, $9)}
+;
+
+call_proc:
+    CALL identifier '(' value_list ')'
+    {$$ = new Stmt.Call(treeID++, $2, $4)}
+    |
+    CALL identifier '(' ')'
+    {$$ = new Stmt.Call(treeID++, $2)}
+;
+
+create_proc:
+    CREATE PROCEDURE identifier parameters AS block_stmt
+    {$$ = new Stmt.CreateProc(treeID++, $3, $6, $4)}
+    |
+    CREATE PROCEDURE identifier AS block_stmt
+    {$$ = new Stmt.CreateProc(treeID++, $3, $5)}
+;
+
+parameters:
+    parameters ',' parameter
+    {
+        $$ = $1
+        $$.push($3)
+    }
+    |
+    parameter
+    {
+        $$ = []
+        $$.push($1)
+    }
+;
+
+parameter:
+    '@' identifier type
+    {$$ = [$2, $3]}
 ;
 
 block_stmt:
@@ -95,6 +142,9 @@ extended_stmt:
     |
     CONTINUE
     {$$ = new Stmt.Continue(treeID++)}
+    |
+    RETURN expr
+    {$$ = new Stmt.Return(treeID++, $2)}
     |
     stmt
 ;
@@ -376,6 +426,11 @@ native_func:
     {$$ = new Expr.TypeOf(treeID++, $3)}
 ;
 
+function_call:
+    identifier '(' value_list ')'
+    {$$ = new Expr.FunctionCall(treeID++, $1, $3)}
+;
+
 option:
     ',' expr
     {$$ = $2}
@@ -469,30 +524,32 @@ expr:
     |
     native_func
     |
+    function_call
+    |
     literal
 ;
 
 literal:
     INT_LITERAL
-    {$$ = new Expr.Literal(treeID++, 'INT', $1)}
+    {$$ = new Literal(treeID++, 'INT', $1)}
     |
     DOUBLE_LITERAL
-    {$$ = new Expr.Literal(treeID++, 'DOUBLE', $1)}
+    {$$ = new Literal(treeID++, 'DOUBLE', $1)}
     |
     DATE_LITERAL
-    {$$ = new Expr.Literal(treeID++, 'DATE', $1)}
+    {$$ = new Literal(treeID++, 'DATE', $1)}
     |
     string_literal
-    {$$ = new Expr.Literal(treeID++, 'STRING', $1)}
+    {$$ = new Literal(treeID++, 'STRING', $1)}
     |
     TRUE
-    {$$ = new Expr.Literal(treeID++, 'BOOLEAN', $1)}
+    {$$ = new Literal(treeID++, 'BOOLEAN', $1)}
     |
     FALSE
-    {$$ = new Expr.Literal(treeID++, 'BOOLEAN', $1)}
+    {$$ = new Literal(treeID++, 'BOOLEAN', $1)}
     |
     NULL
-    {$$ = new Expr.Literal(treeID++, 'NULL', $1)}
+    {$$ = new Literal(treeID++, 'NULL', $1)}
 ;
 
 type:
@@ -529,4 +586,5 @@ string_literal:
 
 const Expr = require('../interpreter/Expression.cjs');
 const Stmt = require('../interpreter/Statement.cjs');
+const Literal = require('../interpreter/Literal.cjs');
 var treeID = 0;

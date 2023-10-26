@@ -1,12 +1,12 @@
 const Context = require('./Context.cjs')
 const Binary = require('./Expression.cjs').Binary
 const markdownTable = require('../util/markdownTable/markdownTable.cjs')
+const {CONTINUE, BREAK} = require('./Types.cjs')
 
 class Stmt{
     constructor(id, tokens, callables=[], root='Statement'){
         this.id = id
         this.tokens = tokens
-        this.tokens.push(';')
         this.callabes = callables
         this.root = root
     }
@@ -28,6 +28,10 @@ class Stmt{
             }
         }
         return dot
+    }
+
+    appendParent(){
+        return ''
     }
 
     appendList(stmts, suffix){
@@ -198,11 +202,12 @@ class InsertInto extends Stmt{
 
 class SelectFrom extends Stmt{
     constructor(id, tableID, selection, condition){
+        const columns = selection === '*' ? ['*'] : selection.map(expr => expr.toString())
         super(
             id,
             [
                 'SELECT',
-                ...selection.map(expr => expr.toString()),
+                ...columns,
                 'FROM',
                 tableID,
             ]
@@ -241,7 +246,6 @@ class Select extends Stmt{
         dot += `\t"${this.id}expr"[label="Expression(s)"]\n`
         dot += `\t"stmt${this.id}" -- "${this.id}"\n`
         dot += `\t"stmt${this.id}" -- "${this.id}expr"\n`
-        dot += this.appendParent()
         return dot
     }
 
@@ -374,12 +378,12 @@ class Block extends Stmt{
 
     interpret(context, state, createContext=true){
         if(createContext){
-            context = new Context(`Block ${state.contextCount++}`, context)
+            context = new Context('Block', context)
         }
         for(const stmt of this.stmts){
-            stmt.interpret(context, state)
-            if(state.flag){
-                break
+            const returnExpr = stmt.interpret(context, state)
+            if(returnExpr){
+                return returnExpr
             }
         }
     }
@@ -399,7 +403,7 @@ class Break extends Stmt{
     }
 
     interpret(context, state){
-        state.flag = 'BREAK'
+        return new BREAK('BREAK')
     }
 }
 
@@ -417,7 +421,7 @@ class Continue extends Stmt{
     }
 
     interpret(context, state){
-        state.flag = 'CONTINUE'
+        return new CONTINUE('CONTINUE')
     }
 }
 
@@ -451,23 +455,23 @@ class For extends Stmt{
     }
 
     interpret(context, state){
-        const local = new Context(`Block ${state.contextCount++}`, context)
-        local.set(this.iterator, 'INT', this.lowerLimit)
+        const local = new Context('Block', context)
         for(let i = this.lowerLimit; i <= this.upperLimit; i++){
-            if(!state.flag){
-                this.block.interpret(local, state, false)
-                local.set(this.iterator,'INT', i+1)
-            }
-            else if(state.flag === 'BREAK'){
-                state.flag = null
-                break
-            }
-            else if(state.flag === 'CONTINUE'){
-                state.flag = null
+            local.set(this.iterator,'INT', i)
+            const returnExpr = this.block.interpret(local, state, false)
+            if(!returnExpr){
                 continue
             }
+            else if(returnExpr.type === 'BREAK'){
+                break
+            }
+            else if(returnExpr.type === 'CONTINUE'){
+                continue
+            }
+            else{
+                return returnExpr
+            }
         }
-        state.flag = null
     }
 }
 
@@ -491,23 +495,23 @@ class While extends Stmt{
     }
 
     interpret(context, state){
-        const local = new Context(`Block ${state.contextCount++}`, context)
+        const local = new Context('Block', context)
         let result = this.condition.interpret(local).valueOf()
         while(result){
-            if(!state.flag){
-                this.block.interpret(local, state, false)
+            const returnExpr = this.block.interpret(local, state, false)
+            if(!returnExpr){
                 result = this.condition.interpret(local).valueOf()
             }
-            else if(state.flag === 'BREAK'){
-                state.flag = null
+            else if(returnExpr.type === 'BREAK'){
                 break
             }
-            else if(state.flag === 'CONTINUE'){
-                state.flag = null
-                continue
+            else if(returnExpr.type === 'CONTINUE'){
+                result = this.condition.interpret(local).valueOf()
+            }
+            else{
+                return returnExpr
             }
         }
-        state.flag = null
     }
 }
 
@@ -544,16 +548,20 @@ class If extends Stmt{
     interpret(context, state){
         const result = this.condition.interpret(context).valueOf()
         if(result){
-            const local = new Context(`Block ${state.contextCount++}`, context)
+            const local = new Context('IfBlock', context)
             for(const stmt of this.stmts){
-                stmt.interpret(local, state)
+                const returnExpr = stmt.interpret(local, state)
+                if(returnExpr){
+                    return returnExpr
+                }
             }
         }
-        else{
-            if(this.elseBlock){
-                const local = new Context(`Block ${state.contextCount++}`, context)
-                for(const stmt of this.elseBlock){
-                    stmt.interpret(local, state)
+        else if(this.elseBlock){
+            const local = new Context('ElseBlock', context)
+            for(const stmt of this.elseBlock){
+                const returnExpr = stmt.interpret(local, state)
+                if(returnExpr){
+                    return returnExpr
                 }
             }
         }
@@ -614,6 +622,72 @@ class Case extends Stmt{
     }
 }
 
+class CreateProc extends Stmt{
+    constructor(id, name, block, parameters=[]){
+        super(id)
+        this.name = name
+        this.block = block
+        this.parameters = parameters
+    }
+
+    interpret(context, state){
+        context.set(this.name, 'PROC', {parameters: this.parameters, block: this.block})
+    }
+}
+
+class Call extends Stmt{
+    constructor(id, name, args=[]){
+        super(id)
+        this.name = name
+        this.arguments = args
+    }
+
+    interpret(context, state){
+        const proc = context.get(this.name).valueOf()
+        const local = new Context(`PROC ${this.name}`, null)
+        for(let i = 0; i < this.arguments.length; i++){
+            const value = this.arguments[i].interpret(context)
+            local.set(proc.parameters[i][0], proc.parameters[i][1], value)
+        }
+        local.prev = context
+        proc.block.interpret(local, state, false)
+    }
+}
+
+class CreateFunc extends Stmt{
+    constructor(id, name, parameters, returnType, block){
+        super(id)
+        this.name = name
+        this.parameters = parameters
+        this.returnType = returnType
+        this.block = block
+    }
+
+    interpret(context, state){
+        context.set(
+            this.name,
+            'FUNC',
+            {
+                parameters: this.parameters,
+                returnType: this.returnType,
+                block: this.block
+            }
+        )
+    }
+}
+
+class Return extends Stmt{
+    constructor(id, expr){
+        super(id)
+        this.expr = expr
+    }
+
+    interpret(context, state=null){
+        const expr = this.expr.interpret(context)
+        return expr
+    }
+}
+
 module.exports = {
     Print,
     Declare,
@@ -635,4 +709,8 @@ module.exports = {
     Continue,
     If,
     Case,
+    CreateProc,
+    Call,
+    CreateFunc,
+    Return,
 }

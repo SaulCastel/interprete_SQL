@@ -237,15 +237,15 @@ function or(left, right){
 }
 
 function not(operand){
-    return new Types.BOOLEAN('BOOLEAN', !operand)
+    return new Types.BOOLEAN('BOOLEAN', !operand.valueOf())
 }
 
 function neg(operand){
     switch(operand.type){
         case 'INT':
-            return new Types.INT('INT', -operand)
+            return new Types.INT('INT', -operand.valueOf())
         case 'DOUBLE':
-            return new Types.DOUBLE('DOUBLE', -operand)
+            return new Types.DOUBLE('DOUBLE', -operand.valueOf())
         default:
             return new Types.NULL('NULL')
     }
