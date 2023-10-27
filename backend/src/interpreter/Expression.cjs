@@ -54,9 +54,9 @@ class Binary extends Expr{
         return dot
     }
 
-    interpret(context = null){
-        const left = this.left.interpret(context)
-        const right = this.right.interpret(context)
+    interpret(context, state){
+        const left = this.left.interpret(context, state)
+        const right = this.right.interpret(context, state)
         switch(this.op){
             case '+':
                 return Operations.sum(left, right)
@@ -109,12 +109,12 @@ class Unary extends Expr{
         return dot
     }
 
-    interpret(context = null){
+    interpret(context, state){
         switch(this.operator){
             case '-':
-                return Operations.neg(this.operand.interpret(context))
+                return Operations.neg(this.operand.interpret(context, state))
             case 'NOT':
-                return Operations.not(this.operand.interpret(context))
+                return Operations.not(this.operand.interpret(context, state))
         }
     }
 }
@@ -141,8 +141,8 @@ class Group extends Expr{
         return dot
     }
 
-    interpret(context = null){
-        return this.expr.interpret(context)
+    interpret(context, state){
+        return this.expr.interpret(context, state)
     }
 }
 
@@ -166,7 +166,7 @@ class Variable extends Expr{
         return dot
     }
 
-    interpret(context){
+    interpret(context, state){
         return context.get(this.name)
     }
 }
@@ -189,7 +189,7 @@ class Identifier extends Expr{
         return dot
     }
 
-    interpret(context){
+    interpret(context, state){
         return context.get(this.name)
     }
 }
@@ -219,8 +219,8 @@ class Cast extends Expr{
         return dot
     }
 
-    interpret(context){
-        const expr = this.expr.interpret(context)
+    interpret(context, state){
+        const expr = this.expr.interpret(context, state)
         return new Literal(null, this.type, expr).interpret()
     }
 }
@@ -240,8 +240,8 @@ class Lower extends Expr{
         return `lower(${this.expr.toString()})`
     }
 
-    interpret(context){
-        const string = this.expr.interpret(context)
+    interpret(context, state){
+        const string = this.expr.interpret(context, state)
         const newString = string.toString().toLowerCase()
         return new Types.STRING('STRING', newString)
     }
@@ -262,8 +262,8 @@ class Upper extends Expr{
         return `upper(${this.expr.toString()})`
     }
 
-    interpret(context){
-        const string = this.expr.interpret(context)
+    interpret(context, state){
+        const string = this.expr.interpret(context, state)
         const newString = string.toString().toUpperCase()
         return new Types.STRING('STRING', newString)
     }
@@ -285,11 +285,11 @@ class Round extends Expr{
         return `round(${this.expr.toString()})`
     }
 
-    interpret(context){
-        const result = this.expr.interpret(context).valueOf()
+    interpret(context, state){
+        const result = this.expr.interpret(context, state).valueOf()
         let newNum
         if(this.decimals){
-            const num = this.decimals.interpret(context).valueOf()
+            const num = this.decimals.interpret(context, state).valueOf()
             newNum = new Types.DOUBLE('DOUBLE', result)
             newNum.setDecimals(num)
         }
@@ -315,8 +315,8 @@ class Len extends Expr{
         return `len(${this.expr.toString()})`
     }
 
-    interpret(context){
-        const string = this.expr.interpret(context).toString()
+    interpret(context, state){
+        const string = this.expr.interpret(context, state).toString()
         return new Types.INT('INT', string.length)
     }
 }
@@ -337,11 +337,11 @@ class Truncate extends Expr{
         return `truncate(${this.expr.toString()})`
     }
 
-    interpret(context){
-        const result = this.expr.interpret(context).valueOf()
+    interpret(context, state){
+        const result = this.expr.interpret(context, state).valueOf()
         let newNum
         if(this.decimals){
-            const num = this.decimals.interpret(context).valueOf()
+            const num = this.decimals.interpret(context, state).valueOf()
             newNum = new Types.DOUBLE('DOUBLE', result)
             newNum.setDecimals(num)
         }
@@ -367,8 +367,8 @@ class TypeOf extends Expr{
         return `typeOf(${this.expr.toString()})`
     }
 
-    interpret(context){
-        const result = this.expr.interpret(context)
+    interpret(context, state){
+        const result = this.expr.interpret(context, state)
         return new Types.STRING('STRING', result.type)
     }
 }
@@ -393,15 +393,15 @@ class FunctionCall extends Expr{
         return `${this.name}(${signature})`
     }
 
-    interpret(context){
+    interpret(context, state){
         const func = context.get(this.name).valueOf()
         const local = new Context(`FUNC ${this.name}`, null)
         for(let i = 0; i < this.arguments.length; i++){
-            const value = this.arguments[i].interpret(context)
+            const value = this.arguments[i].interpret(context, state)
             local.set(func.parameters[i][0], func.parameters[i][1], value)
         }
         local.prev = context
-        const returnExpr = func.block.interpret(local, null, false)
+        const returnExpr = func.block.interpret(local, state, false)
         return new Literal(null, func.returnType, returnExpr.valueOf())
     }
 }

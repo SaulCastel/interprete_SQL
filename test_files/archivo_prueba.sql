@@ -178,7 +178,7 @@ BEGIN
     PRINT "String en minusculas: " + LOWER(@STRING);
     PRINT "String en mayusculas: " + UPPER(@sTRing);
     --PRINT "Redondear numero: " + CAST(ROUND(@num) AS VARCHAR);
-    PRINT "Tipo de dato después de redondear: " + TYPEOF(ROUND(@num));
+    PRINT "Tipo de dato después de redondear: " + TYPEOF(ROUND(@num, 3));
     PRINT "Redondear numero a 3 decimales: " + CAST(ROUND(@num, 3) AS VARCHAR);
     --PRINT "Truncar número: "+CAST(TRUNCATE(@num) AS VARCHAR);
     PRINT "Truncar número a 3 decimales: "+CAST(TRUNCATE(@num, 3) AS VARCHAR);
@@ -193,15 +193,25 @@ BEGIN
     print @str1 + @separator + @str2;
 END;
 
+CREATE TABLE log_factorial
+(
+    argumento INT,
+    resultado INT
+);
 /* Si no te funciona recursivo,
 paniquea */
 CREATE FUNCTION _factorial(@num INT)
 RETURNS INT
 BEGIN
     IF @num = 0 THEN
+        INSERT INTO log_factorial (argumento, resultado)
+        VALUES (@num, 1);
         RETURN 1;
     END IF;
-    RETURN @num * _factorial(@num-1);
+    DECLARE @result INT DEFAULT @num * _factorial(@num-1);
+    INSERT INTO log_factorial (argumento, resultado)
+    VALUES (@num, @result);
+    RETURN @result;
 END;
 
 CREATE PROCEDURE factorial_de_5
@@ -213,7 +223,10 @@ END;
 CALL print_together("Hola","Adios", ", ");
 CALL print_together("Cadena1","Cadena2", ", ");
 SELECT _factorial(4) AS "4!";
+select * FROM log_factorial;
+truncate TABLE log_factorial;
 CALL factorial_de_5();
+select * FROM log_factorial;
 
 BEGIN
     DECLARE @mensaje VARCHAR;

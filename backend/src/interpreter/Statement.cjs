@@ -86,7 +86,7 @@ class Print extends Stmt{
     }
 
     interpret(context, state){
-        const expr = this.expr.interpret(context)
+        const expr = this.expr.interpret(context, state)
         state.messages.push(String(expr)+'\n')
     }
 }
@@ -123,7 +123,7 @@ class DeclareDefault extends Stmt{
     }
 
     interpret(context, state){
-        const expr = this.expr.interpret(context)
+        const expr = this.expr.interpret(context, state)
         context.set(this.key, this.type, expr)
     }
 }
@@ -140,7 +140,7 @@ class Set extends Stmt{
     }
 
     interpret(context, state){
-        const expr = this.expr.interpret(context)
+        const expr = this.expr.interpret(context, state)
         context.set(this.key, expr.type, expr)
     }
 }
@@ -271,7 +271,7 @@ class Select extends Stmt{
         }
         const record = []
         for(const expr of this.selection){
-            const value = expr[0].interpret(context)
+            const value = expr[0].interpret(context, state)
             record.push(value.toString())
             const alias = expr[1]
             if(alias){
@@ -479,7 +479,7 @@ class If extends Stmt{
     }
 
     interpret(context, state){
-        const result = this.condition.interpret(context).valueOf()
+        const result = this.condition.interpret(context, state).valueOf()
         if(result){
             const local = new Context('IfBlock', context)
             for(const stmt of this.stmts){
@@ -540,20 +540,20 @@ class Case extends Stmt{
     }
 
     interpret(context, state){
-        let returnExpr = this.defaultCase.interpret(context)
+        let returnExpr = this.defaultCase.interpret(context, state)
         for(const c of this.cases){
             if(c[0] instanceof Binary){
-                const result = c[0].interpret(context).valueOf()
+                const result = c[0].interpret(context, state).valueOf()
                 if(result){
-                    returnExpr = c[1].interpret(context)
+                    returnExpr = c[1].interpret(context, state)
                     break
                 }
             }
             else{
                 const result = new Binary(null, this.expr, '=', c[0])
-                    .interpret(context).valueOf()
+                    .interpret(context, state).valueOf()
                 if(result){
-                    returnExpr = c[1].interpret(context)
+                    returnExpr = c[1].interpret(context, state)
                     break
                 }
             }
@@ -599,7 +599,7 @@ class Call extends Stmt{
         const proc = context.get(this.name).valueOf()
         const local = new Context(`PROC ${this.name}`, null)
         for(let i = 0; i < this.arguments.length; i++){
-            const value = this.arguments[i].interpret(context)
+            const value = this.arguments[i].interpret(context, state)
             local.set(proc.parameters[i][0], proc.parameters[i][1], value)
         }
         local.prev = context
@@ -647,8 +647,8 @@ class Return extends Stmt{
         this.expr = expr
     }
 
-    interpret(context, state=null){
-        const expr = this.expr.interpret(context)
+    interpret(context, state){
+        const expr = this.expr.interpret(context, state)
         return expr
     }
 }

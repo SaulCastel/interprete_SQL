@@ -18,7 +18,7 @@ class Literal{
         return dot
     }
 
-    interpret(context = null){
+    interpret(){
         switch(this.type){
             case 'INT':
                 return new Types.INT(this.type, this.value)
