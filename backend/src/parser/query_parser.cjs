@@ -156,8 +156,8 @@ break;
 case 40:
 this.$ = new Stmt.If(treeID++, $$[$0-5], $$[$0-3], $$[$0-2])
 break;
-case 41: case 72: case 73: case 75: case 104:
-this.$ = $$[$0]
+case 41:
+this.$ = new Stmt.Else(treeID++, $$[$0])
 break;
 case 43:
 this.$ = new Stmt.Case(treeID++, $$[$0-5], $$[$0-4], $$[$0-2], $$[$0])
@@ -236,6 +236,9 @@ this.$ = new Stmt.Select(treeID++, $$[$0])
 break;
 case 68: case 69:
 this.$ = new Stmt.SelectFrom(treeID++, $$[$0-1], $$[$0-3], $$[$0])
+break;
+case 72: case 73: case 75: case 104:
+this.$ = $$[$0]
 break;
 case 77: case 122:
 this.$ = new Expr.Binary(treeID++, $$[$0-2], 'AND', $$[$0])

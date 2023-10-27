@@ -4,12 +4,30 @@ const Context = require('./Context.cjs')
 const Literal = require('./Literal.cjs')
 
 class Expr{
-    constructor(id){
+    constructor(id, tokens, callables, root='Expression'){
         this.id = id
+        this.tokens = tokens
+        this.callables = callables
+        this.root = root
     }
 
     interpret(){}
-    _genDOT(){}
+
+    _genDOT(){
+        let dot = `\t"${this.id}"[label="${this.root}"]\n`
+        for(const token of this.tokens){
+            if(token[0] === '$'){
+                const child = this.callables[Number(token[1])]
+                dot += child._genDOT()
+            }
+            else{
+                const node = this.id + token
+                dot += `\t"${node}"[label="${token}"]\n`
+                dot += `\t"${this.id}" -- "${node}"\n`
+            }
+        }
+        return dot
+    }
 }
 
 class Binary extends Expr{
@@ -141,7 +159,7 @@ class Variable extends Expr{
     _genDOT(){
         let dot = ''
         dot += `\t"${this.id}"[label="Variable"]\n`
-        dot += `\t"${this.id}@"[label="${this.name}"]\n`
+        dot += `\t"${this.id}@"[label="@"]\n`
         dot += `\t"${this.id}v"[label="${this.name}"]\n`
         dot += `\t"${this.id}" -- "${this.id}@"\n`
         dot += `\t"${this.id}" -- "${this.id}v"\n`
@@ -184,7 +202,7 @@ class Cast extends Expr{
     }
 
     toString(){
-        return `cast ${this.expr.toString()} as ${this.type}`
+        return `cast(${this.expr.toString()} as ${this.type})`
     }
 
     _genDOT(){
@@ -209,17 +227,17 @@ class Cast extends Expr{
 
 class Lower extends Expr{
     constructor(id, expr){
-        super(id)
+        super(
+            id,
+            ['LOWER', '(', '$0',')'],
+            [expr],
+            'FunctionCall'
+        )
         this.expr = expr
     }
 
     toString(){
-        return `lower ${this.expr.toString()}`
-    }
-
-    _genDOT(){
-        let dot = ''
-        return dot
+        return `lower(${this.expr.toString()})`
     }
 
     interpret(context){
@@ -231,17 +249,17 @@ class Lower extends Expr{
 
 class Upper extends Expr{
     constructor(id, expr){
-        super(id)
+        super(
+            id,
+            ['UPPER', '(', '$0',')'],
+            [expr],
+            'FunctionCall'
+        )
         this.expr = expr
     }
 
     toString(){
-        return `upper ${this.expr.toString()}`
-    }
-
-    _genDOT(){
-        let dot = ''
-        return dot
+        return `upper(${this.expr.toString()})`
     }
 
     interpret(context){
@@ -253,18 +271,18 @@ class Upper extends Expr{
 
 class Round extends Expr{
     constructor(id, expr, decimals){
-        super(id)
+        super(
+            id,
+            ['ROUND', '(', '$0', decimals.toString(),')'],
+            [expr],
+            'FunctionCall'
+        )
         this.expr = expr
         this.decimals = decimals
     }
 
     toString(){
-        return `round ${this.expr.toString()}`
-    }
-
-    _genDOT(){
-        let dot = ''
-        return dot
+        return `round(${this.expr.toString()})`
     }
 
     interpret(context){
@@ -284,17 +302,17 @@ class Round extends Expr{
 
 class Len extends Expr{
     constructor(id, expr){
-        super(id)
+        super(
+            id,
+            ['LEN', '(', '$0',')'],
+            [expr],
+            'FunctionCall'
+        )
         this.expr = expr
     }
 
     toString(){
-        return `len ${this.expr.toString()}`
-    }
-
-    _genDOT(){
-        let dot = ''
-        return dot
+        return `len(${this.expr.toString()})`
     }
 
     interpret(context){
@@ -305,18 +323,18 @@ class Len extends Expr{
 
 class Truncate extends Expr{
     constructor(id, expr, decimals){
-        super(id)
+        super(
+            id,
+            ['TRUNCATE', '(', '$0', decimals.toString(),')'],
+            [expr],
+            'FunctionCall'
+        )
         this.expr = expr
         this.decimals = decimals
     }
 
     toString(){
-        return `truncate ${this.expr.toString()}`
-    }
-
-    _genDOT(){
-        let dot = ''
-        return dot
+        return `truncate(${this.expr.toString()})`
     }
 
     interpret(context){
@@ -336,17 +354,17 @@ class Truncate extends Expr{
 
 class TypeOf extends Expr{
     constructor(id, expr){
-        super(id)
+        super(
+            id,
+            ['TYPEOF', '(', '$0',')'],
+            [expr],
+            'FunctionCall'
+        )
         this.expr = expr
     }
 
     toString(){
-        return `typeOf ${this.expr.toString()}`
-    }
-
-    _genDOT(){
-        let dot = ''
-        return dot
+        return `typeOf(${this.expr.toString()})`
     }
 
     interpret(context){
@@ -357,7 +375,12 @@ class TypeOf extends Expr{
 
 class FunctionCall extends Expr{
     constructor(id, name, args){
-        super(id)
+        super(
+            id,
+            [name, '(', ...args.map(arg => arg.toString()), ')'],
+            [],
+            'FunctionCall'
+        )
         this.name = name
         this.arguments = args
     }

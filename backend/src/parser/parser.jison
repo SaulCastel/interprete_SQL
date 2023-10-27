@@ -156,7 +156,7 @@ if_stmt:
 
 else_stmt:
     ELSE extended_stmts
-    {$$ = $2}
+    {$$ = new Stmt.Else(treeID++, $2)}
     |
     /* epsilon */
 ;
