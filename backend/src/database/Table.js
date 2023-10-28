@@ -42,13 +42,13 @@ export default class Table{
     }
 
     update(selection, condition, context){
-        const newValues = this.getNewValues(selection, context)
-        const selected = Object.keys(newValues)
         for(let i = 0; i < this.cardinality; i++){
             const row = this.getRowAtIndex(i)
             const header = this.getHeaderContext(row, context)
             const result = condition.interpret(header).valueOf()
             if(result){
+                const newValues = this.getNewValues(selection, header)
+                const selected = Object.keys(newValues)
                 for(const col of selected){
                     this.columns[col].values[i] = newValues[col]
                 }

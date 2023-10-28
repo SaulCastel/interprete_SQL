@@ -402,7 +402,7 @@ class FunctionCall extends Expr{
         }
         local.prev = context
         const returnExpr = func.block.interpret(local, state, false)
-        return new Literal(null, func.returnType, returnExpr.valueOf())
+        return new Literal(null, func.returnType, returnExpr.valueOf()).interpret()
     }
 }
 

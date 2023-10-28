@@ -137,6 +137,12 @@ extended_stmt:
     |
     var_assignment
     |
+    BREAK
+    {$$ = new Stmt.Break(treeID++)}
+    |
+    CONTINUE
+    {$$ = new Stmt.Continue(treeID++)}
+    |
     RETURN expr
     {$$ = new Stmt.Return(treeID++, $2)}
     |
@@ -144,35 +150,6 @@ extended_stmt:
     {$$ = new Stmt.Return(treeID++, new Literal(treeID++, 'NULL', null))}
     |
     stmt
-;
-
-loop_block:
-    BEGIN loop_stmts END
-    {$$ = new Stmt.Block(treeID++, $2)}
-;
-
-loop_stmts:
-    loop_stmts loop_stmt ';'
-    {
-        $$ = $1
-        $1.push($2)
-    }
-    |
-    loop_stmt ';'
-    {
-        $$ = []
-        $$.push($1)
-    }
-;
-
-loop_stmt:
-    BREAK
-    {$$ = new Stmt.Break(treeID++)}
-    |
-    CONTINUE
-    {$$ = new Stmt.Continue(treeID++)}
-    |
-    extended_stmt
 ;
 
 if_stmt:
@@ -210,7 +187,7 @@ cases:
 ;
 
 for_stmt:
-    FOR for_iterator IN INT_LITERAL '..' INT_LITERAL loop_block
+    FOR for_iterator IN INT_LITERAL '..' INT_LITERAL block_stmt
     {$$ = new Stmt.For(treeID++, $2, $4, $6, $7)}
 ;
 
@@ -222,7 +199,7 @@ for_iterator:
 ;
 
 while_stmt:
-    WHILE expr loop_block
+    WHILE expr block_stmt
     {$$ = new Stmt.While(treeID++, $2, $3)}
 ;
 
@@ -370,73 +347,10 @@ asign_alias:
 ;
 
 where:
-    WHERE conditions
+    WHERE expr
     {$$ = $2}
     |
     /* epsilon */
-;
-
-conditions:
-    conditions AND condition
-    {$$ = new Expr.Binary(treeID++, $1, 'AND', $3)}
-    |
-    conditions OR condition
-    {$$ = new Expr.Binary(treeID++, $1, 'OR', $3)}
-    |
-    condition
-;
-
-condition:
-    column_name '=' cond_expr
-    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
-    |
-    column_name '!=' cond_expr
-    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
-    |
-    column_name '<' cond_expr
-    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
-    |
-    column_name '<=' cond_expr
-    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
-    |
-    column_name '>' cond_expr
-    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
-    |
-    column_name '>=' cond_expr
-    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
-;
-
-column_name:
-    identifier
-    {$$ = new Expr.Identifier(treeID++, $1)}
-;
-
-cond_expr:
-    cond_expr '+' cond_expr
-    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
-    |
-    cond_expr '-' cond_expr
-    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
-    |
-    cond_expr '*' cond_expr
-    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
-    |
-    cond_expr '/' cond_expr
-    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
-    |
-    cond_expr '%' cond_expr
-    {$$ = new Expr.Binary(treeID++, $1, $2, $3)}
-    |
-    '-' cond_expr %prec UMINUS
-    {$$ = new Expr.Unary(treeID++, $1, $2)}
-    |
-    '(' cond_expr ')'
-    {$$ = new Expr.Group(treeID++, $2)}
-    |
-    '@' identifier
-    {$$ = new Expr.Variable(treeID++, $2)}
-    |
-    literal
 ;
 
 native_func:
