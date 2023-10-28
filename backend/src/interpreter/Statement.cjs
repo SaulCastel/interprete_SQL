@@ -15,9 +15,9 @@ class Stmt{
 
     _genDOT(){
         let dot = `\t"${this.id}"[label="${this.root}"]\n`
-        for(const token of this.tokens){
-            if(token[0] === '$'){
-                const child = this.callables[Number(token[1])]
+        for(let i = 0; i < this.tokens.length; i++){
+            if(this.tokens[i][0] === '$'){
+                const child = this.callables[Number(this.tokens[i][1])]
                 dot += child._genDOT()
                 if(child instanceof ASTList){
                     const length = child.stmts.length
@@ -33,8 +33,8 @@ class Stmt{
                 }
             }
             else{
-                const node = this.id + token
-                dot += `\t"${node}"[label="${token}"]\n`
+                const node = `${this.id}.${this.tokens[i]}${i}`
+                dot += `\t"${node}"[label="${this.tokens[i]}"]\n`
                 dot += `\t"${this.id}" -- "${node}"\n`
             }
         }
@@ -516,7 +516,7 @@ class Else extends Stmt{
     }
 }
 
-class Case extends Stmt{
+class SimpleCase extends Stmt{
     constructor(id, expr, cases, defaultCase, alias){
         super(
             id,
@@ -542,25 +542,53 @@ class Case extends Stmt{
     interpret(context, state){
         let returnExpr = this.defaultCase.interpret(context, state)
         for(const c of this.cases){
-            if(c[0] instanceof Binary){
-                const result = c[0].interpret(context, state).valueOf()
-                if(result){
-                    returnExpr = c[1].interpret(context, state)
-                    break
-                }
-            }
-            else{
-                const result = new Binary(null, this.expr, '=', c[0])
-                    .interpret(context, state).valueOf()
-                if(result){
-                    returnExpr = c[1].interpret(context, state)
-                    break
-                }
+            const result = new Binary(null, this.expr, '=', c[0])
+                .interpret(context, state).valueOf()
+            if(result){
+                returnExpr = c[1].interpret(context, state)
+                break
             }
         }
-        if(this.alias){
-            state.messages.push(`${this.alias} -> `+String(returnExpr)+'\n')
+        if(!this.alias){
+            this.alias = 'case'
         }
+        state.messages.push(`${this.alias} -> `+returnExpr.toString()+'\n')
+    }
+}
+
+class ConditionalCase extends Stmt{
+    constructor(id, cases, defaultCase, alias){
+        super(
+            id,
+            [
+                'CASE',
+                ...cases.map(c => `WHEN ${c[0]} THEN ${c[1]}`),
+                `DEFAULT`,
+                defaultCase.toString()
+            ],
+        )
+        if(alias){
+            this.tokens.push('AS')
+            this.tokens.push(alias)
+        }
+        this.cases = cases
+        this.defaultCase = defaultCase
+        this.alias = alias
+    }
+
+    interpret(context, state){
+        let returnExpr = this.defaultCase.interpret(context, state)
+        for(const c of this.cases){
+            const result = c[0].interpret(context, state).valueOf()
+            if(result){
+                returnExpr = c[1].interpret(context, state)
+                break
+            }
+        }
+        if(!this.alias){
+            this.alias = 'case'
+        }
+        state.messages.push(`${this.alias} -> `+returnExpr.toString()+'\n')
     }
 }
 
@@ -674,7 +702,8 @@ module.exports = {
     Continue,
     If,
     Else,
-    Case,
+    SimpleCase,
+    ConditionalCase,
     CreateProc,
     Call,
     CreateFunc,

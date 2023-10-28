@@ -79,7 +79,7 @@ BEGIN
     */
     WHILE @local_num <= 10
     BEGIN
-        CASE @local_num
+        CASE
             WHEN @local_num % 5 = 0 THEN CAST(@local_num AS VARCHAR)+" Es multiplo de 5"
             ELSE CAST(@local_num AS VARCHAR)+" No es multiplo de 5"
         END AS resultado;

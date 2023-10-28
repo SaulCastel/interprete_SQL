@@ -137,16 +137,42 @@ extended_stmt:
     |
     var_assignment
     |
+    RETURN expr
+    {$$ = new Stmt.Return(treeID++, $2)}
+    |
+    RETURN
+    {$$ = new Stmt.Return(treeID++, new Literal(treeID++, 'NULL', null))}
+    |
+    stmt
+;
+
+loop_block:
+    BEGIN loop_stmts END
+    {$$ = new Stmt.Block(treeID++, $2)}
+;
+
+loop_stmts:
+    loop_stmts loop_stmt ';'
+    {
+        $$ = $1
+        $1.push($2)
+    }
+    |
+    loop_stmt ';'
+    {
+        $$ = []
+        $$.push($1)
+    }
+;
+
+loop_stmt:
     BREAK
     {$$ = new Stmt.Break(treeID++)}
     |
     CONTINUE
     {$$ = new Stmt.Continue(treeID++)}
     |
-    RETURN expr
-    {$$ = new Stmt.Return(treeID++, $2)}
-    |
-    stmt
+    extended_stmt
 ;
 
 if_stmt:
@@ -163,7 +189,10 @@ else_stmt:
 
 case_stmt:
     CASE expr cases ELSE expr END asign_alias
-    {$$ = new Stmt.Case(treeID++, $2, $3, $5, $7)}
+    {$$ = new Stmt.SimpleCase(treeID++, $2, $3, $5, $7)}
+    |
+    CASE cases ELSE expr END asign_alias
+    {$$ = new Stmt.ConditionalCase(treeID++, $2, $4, $6)}
 ;
 
 cases:
@@ -181,12 +210,19 @@ cases:
 ;
 
 for_stmt:
-    FOR identifier IN INT_LITERAL '..' INT_LITERAL block_stmt
+    FOR for_iterator IN INT_LITERAL '..' INT_LITERAL loop_block
     {$$ = new Stmt.For(treeID++, $2, $4, $6, $7)}
 ;
 
+for_iterator:
+    identifier
+    |
+    '@' identifier
+    {$$ = $2}
+;
+
 while_stmt:
-    WHILE expr block_stmt
+    WHILE expr loop_block
     {$$ = new Stmt.While(treeID++, $2, $3)}
 ;
 
